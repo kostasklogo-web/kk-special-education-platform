@@ -9,11 +9,11 @@ import type {
   TherapyProgramSummary,
 } from "@/lib/data/children/types";
 import {
-  AUTH_GATING_TEMPORARILY_DISABLED,
-  DEVELOPMENT_ORGANIZATION_ID,
-  DEVELOPMENT_PRIMARY_CENTER_ID,
-  DEVELOPMENT_SECONDARY_CENTER_ID,
-} from "@/lib/auth/get-session-context";
+  DEMO_PRIMARY_CENTER_ID,
+  DEMO_SECONDARY_CENTER_ID,
+  getAuthGatingTemporarilyDisabled,
+  getDemoOrganizationId,
+} from "@/lib/config/demo";
 
 async function mapCentersForChildren(
   rows: ChildRow[]
@@ -123,11 +123,11 @@ export async function getChildWithCenter(id: string): Promise<{
 export async function listCentersForOrganization(
   organizationId: string
 ): Promise<{ centers: CenterSummary[]; error: string | null }> {
-  if (AUTH_GATING_TEMPORARILY_DISABLED && organizationId === DEVELOPMENT_ORGANIZATION_ID) {
+  if (getAuthGatingTemporarilyDisabled() && organizationId === getDemoOrganizationId()) {
     return {
       centers: [
-        { id: DEVELOPMENT_PRIMARY_CENTER_ID, name: "Εύοσμος Θεσσαλονίκης" },
-        { id: DEVELOPMENT_SECONDARY_CENTER_ID, name: "Νίκαια" },
+        { id: DEMO_PRIMARY_CENTER_ID, name: "Εύοσμος Θεσσαλονίκης" },
+        { id: DEMO_SECONDARY_CENTER_ID, name: "Νίκαια" },
       ],
       error: null,
     };
@@ -153,8 +153,8 @@ export async function getDefaultOrganizationIdForUser(): Promise<{
   organizationId: string | null;
   error: string | null;
 }> {
-  if (AUTH_GATING_TEMPORARILY_DISABLED) {
-    return { organizationId: DEVELOPMENT_ORGANIZATION_ID, error: null };
+  if (getAuthGatingTemporarilyDisabled()) {
+    return { organizationId: getDemoOrganizationId(), error: null };
   }
 
   const supabase = await createClient();

@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
-import { AUTH_GATING_TEMPORARILY_DISABLED } from "@/lib/auth/get-session-context";
+import { getAuthGatingTemporarilyDisabled } from "@/lib/config/demo";
 import { isSupabaseReachableQuickly } from "@/lib/supabase/availability";
 import { listSessionsWithAttendance } from "@/lib/data/attendance/queries";
 import { listSessionsInRange } from "@/lib/data/sessions/queries";
@@ -142,7 +142,7 @@ async function countRows(table: string, organizationId: string): Promise<{ count
 }
 
 export async function getDashboardOverview(organizationId: string): Promise<DashboardOverview> {
-  if (AUTH_GATING_TEMPORARILY_DISABLED) {
+  if (getAuthGatingTemporarilyDisabled()) {
     const canReachSupabase = await isSupabaseReachableQuickly();
     if (!canReachSupabase) {
       return DEMO_DASHBOARD_OVERVIEW;

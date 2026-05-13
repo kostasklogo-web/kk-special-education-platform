@@ -1,10 +1,10 @@
 import "server-only";
 
-import { AUTH_GATING_TEMPORARILY_DISABLED } from "@/lib/auth/get-session-context";
+import { getAuthGatingTemporarilyDisabled } from "@/lib/config/demo";
 import { createClient } from "@/lib/supabase/server";
 
 export async function userBelongsToOrganization(organizationId: string): Promise<boolean> {
-  if (AUTH_GATING_TEMPORARILY_DISABLED) {
+  if (getAuthGatingTemporarilyDisabled()) {
     return Boolean(organizationId);
   }
 

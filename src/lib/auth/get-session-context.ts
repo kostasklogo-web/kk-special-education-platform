@@ -2,6 +2,12 @@ import { createClient } from "@/lib/supabase/server";
 import type { RoleCode } from "@/lib/auth/roles";
 import { ROLE_CODES } from "@/lib/auth/roles";
 import { embedSingleWithCode } from "@/lib/supabase/postgrest-embeds";
+import {
+  DEMO_PRIMARY_CENTER_ID,
+  DEMO_SECONDARY_CENTER_ID,
+  getAuthGatingTemporarilyDisabled,
+  getDemoOrganizationId,
+} from "@/lib/config/demo";
 
 function parseRoleCodes(rows: { roles: unknown }[] | null): RoleCode[] {
   const set = new Set<RoleCode>();
@@ -19,11 +25,12 @@ export type SessionContext = {
   roleCodes: RoleCode[];
 };
 
-export const AUTH_GATING_TEMPORARILY_DISABLED = true;
-/** Demo org UUID for Vercel/MVP; Supabase anon RLS must allow reads for this id — see `supabase/migrations/20260513120000_mvp_demo_anon_read_policies.sql`. */
-export const DEVELOPMENT_ORGANIZATION_ID = "10000000-0000-4000-8000-000000000001";
-export const DEVELOPMENT_PRIMARY_CENTER_ID = "11000000-0000-4000-8000-000000000001";
-export const DEVELOPMENT_SECONDARY_CENTER_ID = "11000000-0000-4000-8000-000000000002";
+/** @deprecated Prefer `getAuthGatingTemporarilyDisabled()` from `@/lib/config/demo` (env-driven). */
+export const AUTH_GATING_TEMPORARILY_DISABLED = getAuthGatingTemporarilyDisabled();
+/** @deprecated Prefer `getDemoOrganizationId()` from `@/lib/config/demo`. */
+export const DEVELOPMENT_ORGANIZATION_ID = getDemoOrganizationId();
+export const DEVELOPMENT_PRIMARY_CENTER_ID = DEMO_PRIMARY_CENTER_ID;
+export const DEVELOPMENT_SECONDARY_CENTER_ID = DEMO_SECONDARY_CENTER_ID;
 
 const DEVELOPMENT_SESSION_CONTEXT: SessionContext = {
   user: {
@@ -34,7 +41,7 @@ const DEVELOPMENT_SESSION_CONTEXT: SessionContext = {
 };
 
 export async function getSessionContext(): Promise<SessionContext> {
-  if (AUTH_GATING_TEMPORARILY_DISABLED) {
+  if (getAuthGatingTemporarilyDisabled()) {
     return DEVELOPMENT_SESSION_CONTEXT;
   }
 
