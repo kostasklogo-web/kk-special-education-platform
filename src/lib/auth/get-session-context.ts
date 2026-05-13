@@ -20,6 +20,7 @@ export type SessionContext = {
 };
 
 export const AUTH_GATING_TEMPORARILY_DISABLED = true;
+/** Demo org UUID for Vercel/MVP; Supabase anon RLS must allow reads for this id — see `supabase/migrations/20260513120000_mvp_demo_anon_read_policies.sql`. */
 export const DEVELOPMENT_ORGANIZATION_ID = "10000000-0000-4000-8000-000000000001";
 export const DEVELOPMENT_PRIMARY_CENTER_ID = "11000000-0000-4000-8000-000000000001";
 export const DEVELOPMENT_SECONDARY_CENTER_ID = "11000000-0000-4000-8000-000000000002";
