@@ -99,6 +99,7 @@ export async function listSessionNotesForOrganization(params: {
         ...n,
         session_starts_at: s.starts_at,
         session_therapist_user_id: s.therapist_user_id,
+        child_id: s.child_id,
         child_name: s.child_name,
         therapist_name: s.therapist_name,
         discipline_name_el: s.discipline_name_el,

@@ -1,6 +1,11 @@
 import Link from "next/link";
+import { buildReportsHref } from "@/lib/progress-reports/search-params";
+import { todayAthensYmd } from "@/lib/schedule/athens-civil";
+import { buildScheduleHref } from "@/lib/schedule/search-params";
+import { buildSessionNotesHref } from "@/lib/session-notes/search-params";
 import { buildTherapyGoalsHref } from "@/lib/therapy-goals/search-params";
 import { ChildParentsPanel } from "@/components/children/child-parents-panel";
+import { ChildWorkflowTimeline } from "@/components/children/child-workflow-timeline";
 import { ProfileSectionCard } from "@/components/children/profile-section-card";
 import { EmptyState } from "@/components/shell/EmptyState";
 import type { ChildGender, ChildListItem, ParentLinkRow, TherapyProgramSummary } from "@/lib/data/children/types";
@@ -9,6 +14,7 @@ import {
   CHILD_GENDER_LABELS,
   CHILD_STATUS_LABELS,
   PREFERRED_LANGUAGE_LABELS,
+  formatApproximateAgeYearsEl,
   formatDateEl,
 } from "@/lib/ui/child-labels";
 
@@ -27,6 +33,8 @@ type ChildDetailBodyProps = {
   programs: TherapyProgramSummary[];
   counts: ChildDetailCounts;
   canMutate: boolean;
+  /** Γραμματεία / διοίκηση — νέα συνεδρία από το προφίλ. */
+  canScheduleSessions: boolean;
   canWriteTherapyGoals: boolean;
   loadWarnings: string[];
 };
@@ -38,6 +46,7 @@ export function ChildDetailBody({
   programs,
   counts,
   canMutate,
+  canScheduleSessions,
   canWriteTherapyGoals,
   loadWarnings,
 }: ChildDetailBodyProps) {
@@ -47,7 +56,7 @@ export function ChildDetailBody({
       : "—";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {loadWarnings.length > 0 ? (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
           {loadWarnings.map((w) => (
@@ -56,34 +65,56 @@ export function ChildDetailBody({
         </div>
       ) : null}
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-wide text-ink-faint">Προφίλ παιδιού</p>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink">
-            {child.first_name} {child.last_name}
-          </h1>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href="/children"
-            className="rounded-lg border border-border bg-white px-3 py-2 text-sm font-medium text-ink shadow-sm hover:bg-surface-muted"
-          >
-            ← Λίστα
-          </Link>
-          {canMutate ? (
+      <header className="overflow-hidden rounded-3xl border border-clinical-100/80 bg-gradient-to-br from-white via-clinical-50/35 to-white p-6 shadow-shell sm:p-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-clinical-800">Προφίλ παιδιού</p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
+              {child.first_name} {child.last_name}
+            </h1>
+            <p className="mt-2 text-sm text-ink-muted">
+              {CHILD_STATUS_LABELS[child.status]}
+              {child.center?.name ? ` · ${child.center.name}` : ""}
+              {child.date_of_birth ? ` · ${formatApproximateAgeYearsEl(child.date_of_birth)}` : ""}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
             <Link
-              href={`/children/${child.id}/edit`}
-              className="rounded-lg bg-clinical-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-clinical-700"
+              href="/children"
+              className="inline-flex min-h-[44px] items-center rounded-xl border border-border bg-white px-4 py-2 text-sm font-medium text-ink shadow-sm hover:bg-surface-muted"
             >
-              Επεξεργασία
+              ← Λίστα
             </Link>
-          ) : (
-            <span className="rounded-lg border border-dashed border-border px-3 py-2 text-xs text-ink-faint">
-              Μόνο προβολή (χωρίς δικαίωμα επεξεργασίας)
-            </span>
-          )}
+            {canMutate ? (
+              <Link
+                href={`/children/${child.id}/edit`}
+                className="inline-flex min-h-[44px] items-center rounded-xl bg-clinical-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-clinical-700"
+              >
+                Επεξεργασία
+              </Link>
+            ) : (
+              <span className="inline-flex min-h-[44px] items-center rounded-xl border border-dashed border-border px-4 py-2 text-xs text-ink-faint">
+                Μόνο προβολή
+              </span>
+            )}
+            {canScheduleSessions ? (
+              <Link
+                href={`/schedule/new?child=${encodeURIComponent(child.id)}`}
+                className="inline-flex min-h-[44px] items-center rounded-xl border border-emerald-600/80 bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700"
+              >
+                Νέα συνεδρία
+              </Link>
+            ) : null}
+          </div>
         </div>
-      </div>
+
+        <div className="mt-8 border-t border-clinical-100/80 pt-6">
+          <p className="mb-4 text-center text-[11px] font-semibold uppercase tracking-wide text-ink-faint">
+            Ροή εργασιών — γρήγορη πρόσβαση
+          </p>
+          <ChildWorkflowTimeline childId={child.id} counts={counts} />
+        </div>
+      </header>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
         <ProfileMetricCard
@@ -130,6 +161,10 @@ export function ChildDetailBody({
             <div>
               <dt className="text-xs text-ink-faint">Ημερομηνία γέννησης</dt>
               <dd className="text-ink">{formatDateEl(child.date_of_birth)}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-ink-faint">Ηλικία (εκτίμηση)</dt>
+              <dd className="text-ink">{formatApproximateAgeYearsEl(child.date_of_birth)}</dd>
             </div>
             <div>
               <dt className="text-xs text-ink-faint">Φύλο</dt>
@@ -253,7 +288,11 @@ export function ChildDetailBody({
                 Συνεδρίες (ως βάση για παρουσίες): <strong>{counts.sessions}</strong>
               </p>
               <Link
-                href={`/schedule?view=list&child=${encodeURIComponent(child.id)}`}
+                href={buildScheduleHref({
+                  view: "list",
+                  dateYmd: todayAthensYmd(),
+                  filters: { childId: child.id },
+                })}
                 className="inline-flex rounded-lg border border-border bg-white px-3 py-2 text-sm font-medium text-ink shadow-sm hover:bg-surface-muted"
               >
                 Προβολή στο πρόγραμμα
@@ -277,7 +316,10 @@ export function ChildDetailBody({
                 Σημειώσεις: <strong>{counts.sessionNotes}</strong>
               </p>
               <Link
-                href={`/session-notes?child=${encodeURIComponent(child.id)}`}
+                href={buildSessionNotesHref({
+                  dateYmd: todayAthensYmd(),
+                  filters: { childId: child.id },
+                })}
                 className="inline-flex rounded-lg border border-border bg-white px-3 py-2 text-sm font-medium text-ink shadow-sm hover:bg-surface-muted"
               >
                 Προβολή σημειώσεων
@@ -295,9 +337,17 @@ export function ChildDetailBody({
               description="Δεν υπάρχουν αναφορές προόδου για αυτό το παιδί."
             />
           ) : (
-            <p className="text-ink">
-              Αναφορές: <strong>{counts.reports}</strong>
-            </p>
+            <div className="space-y-3">
+              <p className="text-ink">
+                Αναφορές: <strong>{counts.reports}</strong>
+              </p>
+              <Link
+                href={buildReportsHref({ childId: child.id })}
+                className="inline-flex rounded-lg border border-border bg-white px-3 py-2 text-sm font-medium text-ink shadow-sm hover:bg-surface-muted"
+              >
+                Λίστα αναφορών για αυτό το παιδί
+              </Link>
+            </div>
           )}
         </ProfileSectionCard>
 
@@ -328,10 +378,10 @@ function ProfileMetricCard({
   helper: string;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-shell">
-      <p className="text-xs font-medium uppercase tracking-wide text-ink-faint">{label}</p>
-      <p className="mt-2 text-xl font-semibold text-ink">{value}</p>
-      <p className="mt-1 text-xs leading-5 text-ink-muted">{helper}</p>
+    <div className="rounded-2xl border border-border bg-gradient-to-b from-surface-card to-surface-muted/20 p-4 shadow-shell sm:p-5">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-faint">{label}</p>
+      <p className="mt-2 text-xl font-semibold tabular-nums text-ink sm:text-2xl">{value}</p>
+      <p className="mt-1.5 text-xs leading-relaxed text-ink-muted">{helper}</p>
     </div>
   );
 }

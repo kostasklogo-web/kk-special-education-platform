@@ -5,8 +5,7 @@ import { getAuthGatingTemporarilyDisabled } from "@/lib/config/demo";
 import { isSupabaseReachableQuickly } from "@/lib/supabase/availability";
 import { listSessionsWithAttendance } from "@/lib/data/attendance/queries";
 import { listSessionsInRange } from "@/lib/data/sessions/queries";
-import type { AttendanceStatus } from "@/lib/data/attendance/types";
-import type { SessionListItem } from "@/lib/data/sessions/types";
+import type { AttendanceSessionRow, AttendanceStatus } from "@/lib/data/attendance/types";
 import {
   addDaysAthensCalendar,
   athensEndOfDayUtcIso,
@@ -14,6 +13,8 @@ import {
   todayAthensYmd,
 } from "@/lib/schedule/athens-civil";
 import { athensWeekRangeFromWeekContaining } from "@/lib/schedule/range";
+import { buildAttendanceHref } from "@/lib/attendance/search-params";
+import { buildSessionNotesHref } from "@/lib/session-notes/search-params";
 
 export type DashboardMetric = {
   label: string;
@@ -21,9 +22,20 @@ export type DashboardMetric = {
   helper: string;
 };
 
+export type DashboardOperationalAlert = {
+  id: string;
+  label: string;
+  value: number;
+  helper: string;
+  href: string;
+  tone: "neutral" | "attention" | "positive";
+};
+
 export type DashboardOverview = {
   metrics: DashboardMetric[];
-  todaySessions: SessionListItem[];
+  /** Σημερινές συνεδρίες με κατάσταση παρουσίας (για πίνακα και KPI). */
+  todaySessions: AttendanceSessionRow[];
+  operationalAlerts: DashboardOperationalAlert[];
   attendanceSummary: Record<AttendanceStatus, number>;
   occupancy: {
     label: string;
@@ -76,6 +88,19 @@ const DEMO_DASHBOARD_OVERVIEW: DashboardOverview = {
       center_name: "Εύοσμος Θεσσαλονίκης",
       room_name: "Αίθουσα Λογοθεραπείας 1",
       discipline_name_el: "Λογοθεραπεία",
+      attendance: {
+        session_id: "50000000-0000-4000-8000-000000000001",
+        organization_id: "10000000-0000-4000-8000-000000000001",
+        status: "present",
+        recorded_by_user_id: null,
+        checked_in_at: null,
+        notes: null,
+        actual_starts_at: null,
+        actual_ends_at: null,
+        created_at: "2026-05-12T06:00:00Z",
+        updated_at: "2026-05-12T06:00:00Z",
+      },
+      recorded_by_name: null,
     },
     {
       id: "50000000-0000-4000-8000-000000000002",
@@ -98,6 +123,42 @@ const DEMO_DASHBOARD_OVERVIEW: DashboardOverview = {
       center_name: "Εύοσμος Θεσσαλονίκης",
       room_name: "Αίθουσα Εργοθεραπείας 1",
       discipline_name_el: "Εργοθεραπεία",
+      attendance: null,
+      recorded_by_name: null,
+    },
+  ],
+  operationalAlerts: [
+    {
+      id: "pending_attendance",
+      label: "Παρουσίες προς καταχώρηση (σήμερα)",
+      value: 1,
+      helper: "Συνεδρίες σήμερα με αναμενόμενη ή κενή παρουσία.",
+      href: "/attendance",
+      tone: "attention",
+    },
+    {
+      id: "week_makeup",
+      label: "Αναπληρώσεις (εβδομάδα)",
+      value: 0,
+      helper: "Συνεδρίες με παρουσία «προς αναπλήρωση».",
+      href: "/attendance?view=list",
+      tone: "neutral",
+    },
+    {
+      id: "draft_notes",
+      label: "Σημειώσεις σε πρόχειρο",
+      value: 1,
+      helper: "Απαιτούν ολοκλήρωση ή έλεγχο.",
+      href: "/session-notes",
+      tone: "attention",
+    },
+    {
+      id: "pending_reports",
+      label: "Αναφορές σε εκκρεμότητα",
+      value: 2,
+      helper: "Πρόχειρο / προς έλεγχο.",
+      href: "/reports?status=open",
+      tone: "attention",
     },
   ],
   attendanceSummary: {
@@ -169,7 +230,7 @@ async function getLiveDashboardOverview(organizationId: string): Promise<Dashboa
     parentsCount,
     staffCount,
     roomsCount,
-    todaySessions,
+    todayWithAttendance,
     weekAttendance,
     upcomingSessions,
     openGoals,
@@ -180,7 +241,7 @@ async function getLiveDashboardOverview(organizationId: string): Promise<Dashboa
     countRows("parents", organizationId),
     countRows("staff", organizationId),
     countRows("rooms", organizationId),
-    listSessionsInRange({ organizationId, fromIso: todayRange.fromIso, toIso: todayRange.toIso }),
+    listSessionsWithAttendance({ organizationId, fromIso: todayRange.fromIso, toIso: todayRange.toIso }),
     listSessionsWithAttendance({ organizationId, fromIso: weekRange.fromIso, toIso: weekRange.toIso }),
     listSessionsInRange({ organizationId, fromIso: upcomingRange.fromIso, toIso: upcomingRange.toIso }),
     countOpenGoals(organizationId),
@@ -193,7 +254,7 @@ async function getLiveDashboardOverview(organizationId: string): Promise<Dashboa
     parentsCount.error,
     staffCount.error,
     roomsCount.error,
-    todaySessions.error,
+    todayWithAttendance.error,
     weekAttendance.error,
     upcomingSessions.error,
     openGoals.error,
@@ -217,6 +278,56 @@ async function getLiveDashboardOverview(organizationId: string): Promise<Dashboa
     attendanceSummary[status] += 1;
   }
 
+  const weekMakeupCount = weekAttendance.items.filter((row) => row.attendance?.status === "to_makeup").length;
+
+  const pendingAttendanceToday = todayWithAttendance.items.filter((row) => {
+    if (row.status === "cancelled") return false;
+    return !row.attendance || row.attendance.status === "expected";
+  }).length;
+
+  const operationalAlerts: DashboardOperationalAlert[] = [
+    {
+      id: "pending_attendance",
+      label: "Παρουσίες προς καταχώρηση (σήμερα)",
+      value: pendingAttendanceToday,
+      helper: "Συνεδρίες σήμερα με αναμενόμενη ή κενή παρουσία (εκτός ακυρωμένων).",
+      href: buildAttendanceHref({
+        view: "day",
+        dateYmd: todayYmd,
+        filters: { attendanceStatus: "expected" },
+      }),
+      tone: pendingAttendanceToday > 0 ? "attention" : "neutral",
+    },
+    {
+      id: "week_makeup",
+      label: "Αναπληρώσεις (εβδομάδα)",
+      value: weekMakeupCount,
+      helper: "Συνεδρίες με παρουσία «προς αναπλήρωση» στην τρέχουσα εβδομάδα.",
+      href: buildAttendanceHref({
+        view: "list",
+        dateYmd: todayYmd,
+        filters: { attendanceStatus: "to_makeup" },
+      }),
+      tone: weekMakeupCount > 0 ? "attention" : "neutral",
+    },
+    {
+      id: "draft_notes",
+      label: "Σημειώσεις σε πρόχειρο",
+      value: draftNotes.count,
+      helper: "Απαιτούν ολοκλήρωση ή έλεγχο πριν την κοινοποίηση.",
+      href: buildSessionNotesHref({ dateYmd: todayYmd, filters: {} }),
+      tone: draftNotes.count > 0 ? "attention" : "neutral",
+    },
+    {
+      id: "pending_reports",
+      label: "Αναφορές σε εκκρεμότητα",
+      value: pendingReports.count,
+      helper: "Πρόχειρο, σε αναμονή ή προς έλεγχο.",
+      href: "/reports?status=open",
+      tone: pendingReports.count > 0 ? "attention" : "neutral",
+    },
+  ];
+
   const workloadByTherapist = new Map<string, { discipline: string; sessions: number }>();
   for (const session of upcomingSessions.items) {
     const therapistName = session.therapist_name ?? "Χωρίς θεραπευτή";
@@ -228,9 +339,10 @@ async function getLiveDashboardOverview(organizationId: string): Promise<Dashboa
     workloadByTherapist.set(therapistName, current);
   }
 
-  const todayRoomIds = new Set(todaySessions.items.map((session) => session.room_id).filter(Boolean));
+  const todayItems = todayWithAttendance.items;
+  const todayRoomIds = new Set(todayItems.map((session) => session.room_id).filter(Boolean));
   const centerUsage = new Map<string, number>();
-  for (const session of todaySessions.items) {
+  for (const session of todayItems) {
     const centerName = session.center_name ?? "Χωρίς κέντρο";
     centerUsage.set(centerName, (centerUsage.get(centerName) ?? 0) + 1);
   }
@@ -249,7 +361,7 @@ async function getLiveDashboardOverview(organizationId: string): Promise<Dashboa
       },
       {
         label: "Συνεδρίες σήμερα",
-        value: todaySessions.items.length,
+        value: todayItems.length,
         helper: "Πρόγραμμα ημέρας ανά κέντρο",
       },
       {
@@ -278,7 +390,8 @@ async function getLiveDashboardOverview(organizationId: string): Promise<Dashboa
         helper: "Καταχωρημένοι χώροι παρέμβασης",
       },
     ],
-    todaySessions: todaySessions.items.slice(0, 6),
+    todaySessions: todayItems.slice(0, 12),
+    operationalAlerts,
     attendanceSummary,
     occupancy: [...centerUsage.entries()].map(([label, used]) => ({
       label,

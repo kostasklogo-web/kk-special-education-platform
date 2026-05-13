@@ -35,7 +35,20 @@ function localDatetimeToIso(local: string): string {
   return new Date(local).toISOString();
 }
 
-const STATUSES = Object.keys(ATTENDANCE_STATUS_LABELS_EL) as AttendanceStatus[];
+const QUICK_STATUSES: AttendanceStatus[] = ["present", "absent", "expected", "to_makeup", "cancel_parent"];
+
+function quickBtnClass(active: boolean, code: AttendanceStatus): string {
+  const base =
+    "min-h-[44px] w-full rounded-xl border px-2 py-2 text-center text-xs font-semibold transition sm:text-sm sm:px-3";
+  if (active) {
+    if (code === "present") return `${base} border-emerald-600 bg-emerald-600 text-white shadow-sm`;
+    if (code === "absent") return `${base} border-red-600 bg-red-600 text-white shadow-sm`;
+    if (code === "to_makeup") return `${base} border-amber-600 bg-amber-600 text-white shadow-sm`;
+    if (code === "cancel_parent") return `${base} border-slate-600 bg-slate-600 text-white shadow-sm`;
+    if (code === "expected") return `${base} border-clinical-500 bg-clinical-500 text-white shadow-sm`;
+  }
+  return `${base} border-border bg-white text-ink hover:border-clinical-200 hover:bg-clinical-50/50`;
+}
 
 type AttendanceFormClientProps = {
   action: (prev: AttendanceFormState, formData: FormData) => Promise<AttendanceFormState>;
@@ -60,11 +73,14 @@ export function AttendanceFormClient({
     () => Boolean(existing?.actual_starts_at || existing?.actual_ends_at)
   );
 
+  const [status, setStatus] = useState<AttendanceStatus>(() => existing?.status ?? "expected");
+
   const [state, formAction] = useFormState(action, initial);
 
   return (
     <form action={formAction} className="mx-auto max-w-2xl space-y-8">
       <input type="hidden" name="session_id" value={sessionId} />
+      <input type="hidden" name="status" value={status} />
       <input
         type="hidden"
         name="actual_starts_at"
@@ -85,21 +101,36 @@ export function AttendanceFormClient({
         </div>
       ) : null}
 
-      <fieldset className="space-y-4 rounded-xl border border-border bg-surface-card p-6 shadow-shell">
-        <legend className="px-1 text-sm font-semibold text-ink">Καταχώρηση παρουσίας</legend>
+      <fieldset className="space-y-5 rounded-xl border border-border bg-surface-card p-6 shadow-shell sm:p-7">
+        <legend className="px-1 text-base font-semibold text-ink">Κατάσταση παρουσίας</legend>
+
+        <div>
+          <p className="mb-2 text-xs font-medium uppercase tracking-wide text-ink-muted">Γρήγορη επιλογή</p>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-2 lg:grid-cols-5">
+            {QUICK_STATUSES.map((code) => (
+              <button
+                key={code}
+                type="button"
+                onClick={() => setStatus(code)}
+                className={quickBtnClass(status === code, code)}
+              >
+                {ATTENDANCE_STATUS_LABELS_EL[code]}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <div>
           <label htmlFor="status" className="mb-1 block text-xs font-medium text-ink-muted">
-            Κατάσταση παρουσίας <span className="text-red-600">*</span>
+            Λεπτομερής κατάσταση (όλες οι επιλογές)
           </label>
           <select
             id="status"
-            name="status"
-            required
-            defaultValue={existing?.status ?? "expected"}
-            className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm outline-none ring-clinical-500 focus:ring-2"
+            value={status}
+            onChange={(e) => setStatus(e.target.value as AttendanceStatus)}
+            className="w-full min-h-[44px] rounded-lg border border-border bg-white px-3 py-2 text-sm outline-none ring-clinical-500 focus:ring-2"
           >
-            {STATUSES.map((s) => (
+            {(Object.keys(ATTENDANCE_STATUS_LABELS_EL) as AttendanceStatus[]).map((s) => (
               <option key={s} value={s}>
                 {ATTENDANCE_STATUS_LABELS_EL[s]}
               </option>

@@ -9,6 +9,7 @@ import {
 } from "@/lib/schedule/athens-civil";
 import { EmptyState } from "@/components/shell/EmptyState";
 import { sessionKindLabelEl, sessionStatusLabelEl } from "@/lib/ui/session-labels";
+import { scheduleDayColumnClass, sessionStatusStripeClass } from "@/lib/ui/session-visual";
 
 function groupByAthensDay(items: SessionListItem[]): Map<string, SessionListItem[]> {
   const m = new Map<string, SessionListItem[]>();
@@ -35,7 +36,12 @@ function statusPillClass(status: string): string {
 
 function SessionCard({ s }: { s: SessionListItem }) {
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-white shadow-sm transition hover:border-clinical-300 hover:bg-clinical-50/40">
+    <div
+      className={[
+        "overflow-hidden rounded-xl border border-border bg-white shadow-sm transition hover:border-clinical-300 hover:shadow-md",
+        sessionStatusStripeClass(s.status),
+      ].join(" ")}
+    >
       <Link href={`/schedule/${s.id}`} className="block p-3 text-left">
         <div className="flex items-start justify-between gap-2">
           <div className="text-xs font-semibold text-ink">
@@ -55,12 +61,15 @@ function SessionCard({ s }: { s: SessionListItem }) {
           <span>{s.discipline_name_el ?? s.discipline_code}</span>
         </div>
       </Link>
-      <div className="flex gap-3 border-t border-border bg-surface-muted/30 px-3 py-1.5">
+      <div className="flex flex-wrap gap-3 border-t border-border bg-surface-muted/30 px-3 py-1.5">
+        <Link href={`/children/${s.child_id}`} className="text-xs font-medium text-clinical-700 hover:underline">
+          Φάκελος παιδιού
+        </Link>
         <Link href={`/attendance/${s.id}/edit`} className="text-xs font-medium text-clinical-700 hover:underline">
           Παρουσία
         </Link>
         <Link href={`/schedule/${s.id}`} className="text-xs text-ink-muted hover:underline">
-          Πρόγραμμα
+          Λεπτομέρειες συνεδρίας
         </Link>
       </div>
     </div>
@@ -107,12 +116,18 @@ export function ScheduleWeekPanel({ items, anchorYmd }: { items: SessionListItem
       </div>
 
       <div className="grid gap-3 lg:grid-cols-7">
-      {columns.map((col) => (
-        <div key={col.ymd} className="min-h-[120px] rounded-xl border border-border bg-surface-muted/30 p-2">
-          <div className="mb-2 border-b border-border pb-2 text-center">
-            <p className="text-xs font-semibold capitalize text-ink">{col.title}</p>
-            <p className="mt-0.5 text-[11px] text-ink-faint">
-              {col.items.length === 0 ? "Χωρίς συνεδρίες" : `${col.items.length} συνεδρίες`}
+      {columns.map((col, idx) => (
+        <div
+          key={col.ymd}
+          className={[
+            "min-h-[128px] rounded-xl border border-border/80 p-2 shadow-sm",
+            scheduleDayColumnClass(idx),
+          ].join(" ")}
+        >
+          <div className="mb-2 rounded-lg border border-border/60 bg-white/90 px-1.5 py-2 text-center shadow-sm">
+            <p className="text-[11px] font-bold uppercase leading-tight tracking-wide text-clinical-900">{col.title}</p>
+            <p className="mt-0.5 text-[10px] font-medium text-ink-muted">
+              {col.items.length === 0 ? "Κενό" : `${col.items.length} συνεδρίες`}
             </p>
           </div>
           <div className="flex flex-col gap-2">
@@ -193,13 +208,18 @@ export function ScheduleListPanel({ items }: { items: SessionListItem[] }) {
             <th className="px-4 py-3">Ειδικότητα</th>
             <th className="px-4 py-3">Τύπος</th>
             <th className="px-4 py-3">Κατάσταση</th>
-            <th className="px-4 py-3">Παρουσία</th>
+            <th className="sticky right-0 z-20 bg-surface-muted/95 px-4 py-3 text-right shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)]">Ενέργειες</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
           {sorted.map((s) => (
             <tr key={s.id} className="hover:bg-surface-muted/40">
-              <td className="whitespace-nowrap px-4 py-2 text-ink">
+              <td
+                className={[
+                  "whitespace-nowrap px-4 py-2 pl-3 text-ink",
+                  sessionStatusStripeClass(s.status),
+                ].join(" ")}
+              >
                 {new Intl.DateTimeFormat("el-GR", {
                   timeZone: "Europe/Athens",
                   dateStyle: "medium",
@@ -209,7 +229,7 @@ export function ScheduleListPanel({ items }: { items: SessionListItem[] }) {
                 {formatAthensTimeEl(s.starts_at)} — {formatAthensTimeEl(s.ends_at)}
               </td>
               <td className="px-4 py-2">
-                <Link href={`/schedule/${s.id}`} className="font-medium text-clinical-700 hover:underline">
+                <Link href={`/children/${s.child_id}`} className="font-medium text-clinical-700 hover:underline">
                   {s.child_name}
                 </Link>
               </td>
@@ -223,12 +243,13 @@ export function ScheduleListPanel({ items }: { items: SessionListItem[] }) {
                   {sessionStatusLabelEl(s.status)}
                 </span>
               </td>
-              <td className="px-4 py-2">
-                <Link
-                  href={`/attendance/${s.id}/edit`}
-                  className="text-xs font-medium text-clinical-700 hover:underline"
-                >
-                  Καταχώρηση
+              <td className="sticky right-0 z-10 whitespace-nowrap bg-surface-card px-4 py-2 text-right text-xs shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.06)]">
+                <Link href={`/schedule/${s.id}`} className="font-medium text-clinical-700 hover:underline">
+                  Συνεδρία
+                </Link>
+                <span className="text-ink-faint"> · </span>
+                <Link href={`/attendance/${s.id}/edit`} className="text-clinical-700 hover:underline">
+                  Παρουσία
                 </Link>
               </td>
             </tr>

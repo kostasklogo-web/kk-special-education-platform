@@ -12,7 +12,8 @@ import { canAccessScheduleModule, canEditExistingSession } from "@/lib/auth/sche
 import { getSessionContext } from "@/lib/auth/get-session-context";
 import { getSessionById } from "@/lib/data/sessions/queries";
 import { PageHeader } from "@/components/shell/PageHeader";
-import { formatAthensTimeEl } from "@/lib/schedule/athens-civil";
+import { formatAthensTimeEl, formatYmdAthensFromUtcMs } from "@/lib/schedule/athens-civil";
+import { buildSessionNotesHref } from "@/lib/session-notes/search-params";
 import { sessionKindLabelEl, sessionStatusLabelEl } from "@/lib/ui/session-labels";
 
 type SessionDetailPageProps = {
@@ -50,6 +51,11 @@ export default async function SessionDetailPage({ params }: SessionDetailPagePro
   );
   const showSessionNotes = canAccessSessionNotesModule(ctx.roleCodes) && session.status === "completed";
   const showSessionNotesWrite = showSessionNotes && canWriteSessionNotes(ctx.roleCodes);
+  const sessionDateYmd = formatYmdAthensFromUtcMs(new Date(session.starts_at).getTime());
+  const sessionNotesForChildHref = buildSessionNotesHref({
+    dateYmd: sessionDateYmd,
+    filters: { childId: session.child_id },
+  });
 
   return (
     <div>
@@ -63,6 +69,12 @@ export default async function SessionDetailPage({ params }: SessionDetailPagePro
               className="rounded-lg border border-border bg-white px-4 py-2 text-sm font-medium text-ink shadow-sm hover:bg-surface-muted"
             >
               Πρόγραμμα
+            </Link>
+            <Link
+              href={`/children/${session.child_id}`}
+              className="rounded-lg border border-border bg-white px-4 py-2 text-sm font-medium text-ink shadow-sm hover:bg-surface-muted"
+            >
+              Προφίλ παιδιού
             </Link>
             {showEdit ? (
               <Link
@@ -90,10 +102,10 @@ export default async function SessionDetailPage({ params }: SessionDetailPagePro
             ) : null}
             {showSessionNotes ? (
               <Link
-                href="/session-notes"
+                href={sessionNotesForChildHref}
                 className="rounded-lg border border-border bg-white px-4 py-2 text-sm font-medium text-ink shadow-sm hover:bg-surface-muted"
               >
-                Σημειώσεις
+                Σημειώσεις (αυτό το παιδί)
               </Link>
             ) : null}
             {showSessionNotesWrite ? (
@@ -109,7 +121,7 @@ export default async function SessionDetailPage({ params }: SessionDetailPagePro
       />
 
       <dl className="mx-auto max-w-2xl divide-y divide-border rounded-xl border border-border bg-surface-card shadow-shell">
-        <DetailRow label="Παιδί" value={session.child_name} />
+        <DetailRow label="Παιδί" value={session.child_name} childId={session.child_id} />
         <DetailRow label="Θεραπευτής" value={session.therapist_name ?? "—"} />
         <DetailRow label="Ειδικότητα / Τομέας" value={session.discipline_name_el ?? session.discipline_code} />
         <DetailRow label="Κέντρο / Τοποθεσία" value={session.center_name ?? "—"} />
@@ -135,15 +147,25 @@ function DetailRow({
   label,
   value,
   multiline,
+  childId,
 }: {
   label: string;
   value: string;
   multiline?: boolean;
+  childId?: string;
 }) {
   return (
     <div className="grid gap-1 px-4 py-3 sm:grid-cols-3 sm:gap-4">
       <dt className="text-sm font-medium text-ink-muted">{label}</dt>
-      <dd className={`text-sm text-ink sm:col-span-2 ${multiline ? "whitespace-pre-wrap" : ""}`}>{value}</dd>
+      <dd className={`text-sm text-ink sm:col-span-2 ${multiline ? "whitespace-pre-wrap" : ""}`}>
+        {childId ? (
+          <Link href={`/children/${childId}`} className="font-medium text-clinical-700 hover:underline">
+            {value}
+          </Link>
+        ) : (
+          value
+        )}
+      </dd>
     </div>
   );
 }

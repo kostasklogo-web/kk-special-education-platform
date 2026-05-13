@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { UsersRound } from "lucide-react";
 import type { ChildListItem } from "@/lib/data/children/types";
-import { CHILD_STATUS_LABELS, formatDateEl } from "@/lib/ui/child-labels";
+import { CHILD_STATUS_LABELS, formatApproximateAgeYearsEl, formatDateEl } from "@/lib/ui/child-labels";
 
 type ChildListTableProps = {
   items: ChildListItem[];
@@ -48,6 +48,9 @@ export function ChildListTable({ items, canMutate }: ChildListTableProps) {
                 Ημ. γέννησης
               </th>
               <th scope="col" className="hidden px-4 py-3.5 text-xs font-semibold uppercase tracking-wide text-ink-muted md:table-cell">
+                Ηλικία
+              </th>
+              <th scope="col" className="hidden px-4 py-3.5 text-xs font-semibold uppercase tracking-wide text-ink-muted md:table-cell">
                 Κέντρο
               </th>
               <th scope="col" className="px-4 py-3.5 text-xs font-semibold uppercase tracking-wide text-ink-muted">
@@ -61,10 +64,21 @@ export function ChildListTable({ items, canMutate }: ChildListTableProps) {
           <tbody className="divide-y divide-border">
             {items.map((row) => (
               <tr key={row.id} className="hover:bg-surface-muted/40">
-                <td className="whitespace-nowrap px-4 py-3 font-medium text-ink">{row.last_name}</td>
-                <td className="whitespace-nowrap px-4 py-3 text-ink-muted">{row.first_name}</td>
+                <td className="whitespace-nowrap px-4 py-3 font-medium text-ink">
+                  <Link href={`/children/${row.id}`} className="text-clinical-800 hover:underline">
+                    {row.last_name}
+                  </Link>
+                </td>
+                <td className="whitespace-nowrap px-4 py-3 text-ink-muted">
+                  <Link href={`/children/${row.id}`} className="hover:text-ink hover:underline">
+                    {row.first_name}
+                  </Link>
+                </td>
                 <td className="hidden whitespace-nowrap px-4 py-3 text-ink-muted sm:table-cell">
                   {formatDateEl(row.date_of_birth)}
+                </td>
+                <td className="hidden whitespace-nowrap px-4 py-3 text-ink-muted md:table-cell">
+                  {formatApproximateAgeYearsEl(row.date_of_birth)}
                 </td>
                 <td className="hidden max-w-[12rem] truncate px-4 py-3 text-ink-muted md:table-cell">
                   {row.center?.name ?? "—"}

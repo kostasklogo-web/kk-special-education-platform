@@ -42,7 +42,11 @@ export function TherapyGoalsTable({
                   {row.title}
                 </Link>
               </td>
-              <td className="px-4 py-2 text-ink-muted">{row.child_name}</td>
+              <td className="px-4 py-2 text-ink-muted">
+                <Link href={`/children/${row.child_id}`} className="hover:text-clinical-800 hover:underline">
+                  {row.child_name}
+                </Link>
+              </td>
               <td className="px-4 py-2 text-ink-muted">{row.plan_title ?? "—"}</td>
               <td className="px-4 py-2 text-ink-muted">{row.discipline_name_el ?? row.discipline_code}</td>
               <td className="px-4 py-2 text-ink-muted">{row.therapist_name ?? "—"}</td>

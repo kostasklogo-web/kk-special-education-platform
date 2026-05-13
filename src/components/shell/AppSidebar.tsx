@@ -20,13 +20,21 @@ const NAV_HELPERS: Record<string, string> = {
   "/attendance": "Παρουσίες & αναπληρώσεις",
   "/therapy-goals": "Στόχοι παρέμβασης",
   "/session-notes": "Κλινική τεκμηρίωση",
-  "/reports": "Κλινικές & λειτουργικές αναφορές",
+  "/reports": "Αναφορές προόδου & ουρά εκκρεμοτήτων",
   "/rooms": "Χώροι παρέμβασης",
   "/settings": "Κέντρα, ρόλοι & ρυθμίσεις",
 };
 
-const WORKFLOW_NAV = new Set(["/children", "/parents", "/schedule", "/attendance", "/therapy-goals", "/session-notes"]);
-const ADMIN_NAV = new Set(["/staff", "/rooms", "/settings", "/reports"]);
+const WORKFLOW_NAV = new Set([
+  "/children",
+  "/parents",
+  "/schedule",
+  "/attendance",
+  "/therapy-goals",
+  "/session-notes",
+  "/reports",
+]);
+const ADMIN_NAV = new Set(["/staff", "/rooms", "/settings"]);
 
 export function AppSidebar({ roleCodes }: AppSidebarProps) {
   const pathname = usePathname();
@@ -39,7 +47,7 @@ export function AppSidebar({ roleCodes }: AppSidebarProps) {
   const linkClass = (href: string) => {
     const active = pathname === href || pathname.startsWith(`${href}/`);
     return [
-      "group flex items-center gap-3 rounded-xl border px-3 py-2.5 text-sm transition-colors duration-150",
+      "group flex min-h-[44px] items-center gap-3 rounded-xl border px-3 py-3 text-sm transition-colors duration-150 sm:py-2.5",
       active
         ? "border-clinical-200/80 bg-gradient-to-r from-clinical-50 to-white text-clinical-950 shadow-sm"
         : "border-transparent text-ink-muted hover:border-border hover:bg-surface-muted hover:text-ink",

@@ -24,6 +24,7 @@ export type SessionNoteRow = {
 export type SessionNoteListItem = SessionNoteRow & {
   session_starts_at: string;
   session_therapist_user_id: string;
+  child_id: string;
   child_name: string;
   therapist_name: string | null;
   discipline_name_el: string | null;

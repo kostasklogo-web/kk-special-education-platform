@@ -16,7 +16,11 @@ import { PageHeader } from "@/components/shell/PageHeader";
 import { SessionFormClient } from "@/components/schedule/session-form-client";
 import { createSessionAction } from "@/app/(shell)/schedule/actions";
 
-export default async function NewSessionPage() {
+type NewSessionPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function NewSessionPage({ searchParams }: NewSessionPageProps) {
   const ctx = await getSessionContext();
   if (!canAccessScheduleModule(ctx.roleCodes)) {
     redirect("/dashboard");
@@ -36,6 +40,9 @@ export default async function NewSessionPage() {
       </div>
     );
   }
+
+  const raw = await searchParams;
+  const presetChildId = typeof raw.child === "string" && raw.child.length > 0 ? raw.child : undefined;
 
   const [centersRes, therapistsRes, childrenRes, roomsRes, disciplinesRes] = await Promise.all([
     listCentersForOrganization(organizationId),
@@ -87,6 +94,7 @@ export default async function NewSessionPage() {
           therapists={therapistsRes.therapists}
           childOptions={childrenRes.children}
           disciplines={disciplinesRes.disciplines}
+          defaultValues={presetChildId ? { child_id: presetChildId } : undefined}
         />
       )}
     </div>

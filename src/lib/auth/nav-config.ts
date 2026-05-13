@@ -90,7 +90,12 @@ export const MAIN_NAV: NavItem[] = [
       "THERAPIST",
     ],
   },
-  { href: "/reports", label: "Αναφορές", icon: BarChart3 },
+  {
+    href: "/reports",
+    label: "Αναφορές",
+    icon: BarChart3,
+    anyOf: ["ORG_OWNER", "ORG_ADMIN", "RECEPTION", "SUPERVISOR", "THERAPIST"],
+  },
   {
     href: "/rooms",
     label: "Αίθουσες",

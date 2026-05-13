@@ -45,9 +45,14 @@ export function SessionNotesTable({
                 }).format(new Date(row.session_starts_at))}
               </td>
               <td className="px-4 py-2">
-                <Link href={`/session-notes/${row.id}`} className="font-medium text-clinical-700 hover:underline">
-                  {row.child_name}
-                </Link>
+                <div className="flex flex-col gap-0.5">
+                  <Link href={`/session-notes/${row.id}`} className="text-xs font-medium text-ink-muted hover:text-clinical-800 hover:underline">
+                    Σημείωση
+                  </Link>
+                  <Link href={`/children/${row.child_id}`} className="font-medium text-clinical-700 hover:underline">
+                    {row.child_name}
+                  </Link>
+                </div>
               </td>
               <td className="px-4 py-2 text-ink-muted">{row.therapist_name ?? "—"}</td>
               <td className="px-4 py-2 text-ink-muted">{row.discipline_name_el ?? row.discipline_code}</td>

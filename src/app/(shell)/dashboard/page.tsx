@@ -14,15 +14,22 @@ import {
   UsersRound,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { DashboardQuickActions } from "@/components/dashboard/dashboard-quick-actions";
+import { DashboardTodaySessionRow } from "@/components/dashboard/dashboard-today-session-row";
 import { KpiStatCard } from "@/components/dashboard/kpi-stat-card";
+import { OperationalAlertCards } from "@/components/dashboard/operational-alert-cards";
 import { EmptyState } from "@/components/shell/EmptyState";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { getSessionContext } from "@/lib/auth/get-session-context";
+import type { RoleCode } from "@/lib/auth/roles";
 import { getDefaultOrganizationIdForUser } from "@/lib/data/children/queries";
 import { getDashboardOverview } from "@/lib/data/dashboard/queries";
+import { buildAttendanceHref } from "@/lib/attendance/search-params";
+import { buildReportsHref } from "@/lib/progress-reports/search-params";
+import { buildSessionNotesHref } from "@/lib/session-notes/search-params";
 import { attendanceStatusLabelEl } from "@/lib/ui/attendance-labels";
-import { sessionKindLabelEl, sessionStatusLabelEl } from "@/lib/ui/session-labels";
-import { formatAthensLongDateFromYmd, formatAthensTimeEl, todayAthensYmd } from "@/lib/schedule/athens-civil";
+import { formatAthensLongDateFromYmd, todayAthensYmd } from "@/lib/schedule/athens-civil";
+import { buildScheduleHref } from "@/lib/schedule/search-params";
 
 const ATTENDANCE_FLOW = [
   "expected",
@@ -45,10 +52,22 @@ const KPI_ICONS: LucideIcon[] = [
 
 const sectionShell = "rounded-2xl border border-border bg-surface-card shadow-shell";
 
+const KPI_LINKS = [
+  "/children",
+  "/parents",
+  buildScheduleHref({ view: "day", dateYmd: todayAthensYmd(), filters: {} }),
+  buildScheduleHref({ view: "list", dateYmd: todayAthensYmd(), filters: {} }),
+  "/therapy-goals",
+  "/session-notes",
+  "/staff",
+  "/rooms",
+] as const;
+
 export default async function DashboardPage() {
   const ctx = await getSessionContext();
   const { organizationId, error: orgErr } = await getDefaultOrganizationIdForUser();
-  const todayLabel = formatAthensLongDateFromYmd(todayAthensYmd());
+  const todayYmd = todayAthensYmd();
+  const todayLabel = formatAthensLongDateFromYmd(todayYmd);
 
   if (orgErr || !organizationId) {
     return (
@@ -74,28 +93,30 @@ export default async function DashboardPage() {
   const childrenMetric = overview.metrics[0];
   const parentsMetric = overview.metrics[1];
 
+  const isClinicalTherapistDesk =
+    ctx.roleCodes.includes("THERAPIST") &&
+    !ctx.roleCodes.some((r: RoleCode) => ["ORG_OWNER", "ORG_ADMIN", "RECEPTION", "SUPERVISOR"].includes(r));
+
+  const therapistUserId = ctx.user?.id ?? null;
+  const todaySessionsForUser =
+    isClinicalTherapistDesk && therapistUserId
+      ? overview.todaySessions.filter((s) => s.therapist_user_id === therapistUserId)
+      : overview.todaySessions;
+
   return (
     <div className="space-y-8">
       <PageHeader
         eyebrow="Επιχειρησιακός πίνακας"
         title="Λειτουργία κέντρου"
         description="Ζωντανή εικόνα για πολυθεματικό κέντρο ειδικής αγωγής: ωφελούμενοι, οικογένειες, πρόγραμμα, παρουσίες, κλινικοί στόχοι και τεκμηρίωση."
-        meta={<span className="text-ink-muted">{todayLabel}</span>}
+        meta={<span className="text-sm text-ink-muted">{todayLabel}</span>}
         actions={
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href="/schedule"
-              className="rounded-lg border border-border bg-white px-4 py-2 text-sm font-medium text-ink shadow-sm transition hover:border-clinical-200 hover:bg-clinical-50/60"
-            >
-              Πρόγραμμα
-            </Link>
-            <Link
-              href="/children/new"
-              className="rounded-lg bg-clinical-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-clinical-700"
-            >
-              Νέος φάκελος παιδιού
-            </Link>
-          </div>
+          <Link
+            href={buildScheduleHref({ view: "day", dateYmd: todayYmd, filters: {} })}
+            className="inline-flex min-h-[44px] items-center rounded-xl border border-clinical-200 bg-white px-4 py-2 text-sm font-semibold text-clinical-900 shadow-sm transition hover:bg-clinical-50"
+          >
+            Άνοιγμα ημέρας
+          </Link>
         }
       />
 
@@ -106,7 +127,9 @@ export default async function DashboardPage() {
         </div>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <DashboardQuickActions />
+
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {overview.metrics.map((metric, i) => (
           <KpiStatCard
             key={metric.label}
@@ -115,9 +138,21 @@ export default async function DashboardPage() {
             helper={metric.helper}
             icon={KPI_ICONS[i]}
             emphasis={i < 4}
+            href={KPI_LINKS[i]}
+            variant={i < 4 ? "default" : "muted"}
           />
         ))}
       </div>
+
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">Εκκρεμότητες λειτουργίας</h2>
+          <Link href="/attendance" className="text-xs font-semibold text-clinical-700 hover:underline">
+            Παρουσιολόγιο →
+          </Link>
+        </div>
+        <OperationalAlertCards items={overview.operationalAlerts} />
+      </section>
 
       <section
         className={`${sectionShell} border-clinical-100/70 bg-gradient-to-br from-white via-clinical-50/30 to-white px-5 py-5 sm:px-6`}
@@ -150,45 +185,33 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      <section
-        className={`${sectionShell} border-amber-200/60 bg-gradient-to-r from-amber-50/90 via-white to-surface-card px-5 py-5 sm:flex sm:items-center sm:justify-between sm:gap-6 sm:px-6`}
-      >
-        <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-amber-200 bg-white shadow-sm">
-            <FileText className="h-5 w-5 text-amber-800" aria-hidden />
-          </div>
-          <div>
-            <h2 className="text-base font-semibold text-ink">Αναφορές σε εκκρεμότητα</h2>
-            <p className="mt-1 max-w-prose text-sm leading-relaxed text-ink-muted">
-              Κλινικές και λειτουργικές αναφορές που αναμένουν ολοκλήρωση ή έλεγχο πριν την κοινοποίηση σε γονείς ή φορείς.
-            </p>
-          </div>
-        </div>
-        <div className="mt-4 flex shrink-0 flex-wrap items-center gap-4 sm:mt-0 sm:flex-col sm:items-end">
-          <p className="text-4xl font-semibold tabular-nums tracking-tight text-amber-950">{overview.pendingReportCount}</p>
-          <Link
-            href="/reports"
-            className="inline-flex rounded-lg border border-amber-300/80 bg-white px-4 py-2 text-sm font-medium text-amber-950 shadow-sm transition hover:bg-amber-50"
-          >
-            Διαχείριση αναφορών
-          </Link>
-        </div>
-      </section>
-
       <div className="grid gap-8 xl:grid-cols-[1.35fr_0.95fr]">
         <div className="space-y-8">
-          <section className={sectionShell}>
-            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border px-5 py-4 sm:px-6">
+          <section className={`${sectionShell} overflow-hidden`}>
+            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border bg-gradient-to-r from-clinical-50/30 to-transparent px-5 py-4 sm:px-6">
               <div>
                 <h2 className="text-base font-semibold text-ink">Σημερινό πρόγραμμα</h2>
                 <p className="mt-1 max-w-prose text-sm leading-relaxed text-ink-muted">
-                  Ροή συνεδριών για γραμματεία και θεραπευτές — ώρα, ωφελούμενος, ειδικότητα και χώρος.
+                  Ροή συνεδριών με χρώμα κατάστασης, παρουσία και γρήγορη καταχώρηση παρουσίας όπου εκκρεμεί.
                 </p>
               </div>
-              <CalendarDays className="h-5 w-5 shrink-0 text-clinical-700" aria-hidden />
+              <div className="flex shrink-0 items-center gap-2">
+                <Link
+                  href={buildScheduleHref({ view: "day", dateYmd: todayYmd, filters: {} })}
+                  className="text-xs font-semibold text-clinical-700 hover:underline"
+                >
+                  Πλήρες πρόγραμμα
+                </Link>
+                <CalendarDays className="h-5 w-5 text-clinical-700" aria-hidden />
+              </div>
             </div>
 
-            {overview.todaySessions.length === 0 ? (
+            {isClinicalTherapistDesk ? (
+              <p className="border-b border-border px-5 py-3 text-sm text-ink-muted sm:px-6">
+                Προβολή <strong className="text-ink">μόνο των δικών σας</strong> συνεδριών σήμερα. Για πλήρες κέντρο απαιτείται ρόλος γραμματείας, επόπτη ή διοίκησης.
+              </p>
+            ) : null}
+            {todaySessionsForUser.length === 0 ? (
               <div className="p-5 sm:p-6">
                 <EmptyState
                   title="Κενό πρόγραμμα για σήμερα"
@@ -196,33 +219,9 @@ export default async function DashboardPage() {
                 />
               </div>
             ) : (
-              <div className="divide-y divide-border">
-                {overview.todaySessions.map((session) => (
-                  <Link
-                    key={session.id}
-                    href={`/schedule/${session.id}`}
-                    className="grid gap-3 px-5 py-4 transition hover:bg-surface-muted/50 sm:px-6 md:grid-cols-[7rem_1fr_auto]"
-                  >
-                    <div className="text-sm font-semibold text-ink">
-                      {formatAthensTimeEl(session.starts_at)}
-                      <span className="block text-xs font-normal text-ink-muted">{formatAthensTimeEl(session.ends_at)}</span>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate font-medium text-ink">{session.child_name}</p>
-                      <p className="mt-1 text-sm text-ink-muted">
-                        {session.therapist_name ?? "Χωρίς ανάθεση θεραπευτή"} · {session.discipline_name_el ?? session.discipline_code}
-                        {session.room_name ? ` · ${session.room_name}` : ""}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap items-start gap-2 md:justify-end">
-                      <span className="rounded-full bg-clinical-50 px-2.5 py-1 text-xs font-medium text-clinical-900">
-                        {sessionKindLabelEl(session.session_kind)}
-                      </span>
-                      <span className="rounded-full bg-surface-muted px-2.5 py-1 text-xs font-medium text-ink-muted">
-                        {sessionStatusLabelEl(session.status)}
-                      </span>
-                    </div>
-                  </Link>
+              <div className="divide-y divide-border/80">
+                {todaySessionsForUser.map((session) => (
+                  <DashboardTodaySessionRow key={session.id} session={session} />
                 ))}
               </div>
             )}
@@ -320,8 +319,28 @@ export default async function DashboardPage() {
             <p className="mt-1 text-sm text-ink-muted">Γρήγορη πρόσβαση σε εκκρεμότητες και καταχωρήσεις.</p>
             <div className="mt-4 grid gap-3">
               <WorkflowLink href="/therapy-goals" icon={Target} label="Θεραπευτικοί στόχοι" value={overview.openGoalCount} />
-              <WorkflowLink href="/session-notes" icon={FileText} label="Σημειώσεις συνεδριών" value={overview.draftNoteCount} />
-              <WorkflowLink href="/attendance" icon={ClipboardCheck} label="Παρουσίες (αναμενόμενες)" value={overview.attendanceSummary.expected} />
+              <WorkflowLink
+                href={buildSessionNotesHref({ dateYmd: todayAthensYmd(), filters: {} })}
+                icon={FileText}
+                label="Σημειώσεις συνεδριών"
+                value={overview.draftNoteCount}
+              />
+              <WorkflowLink
+                href={buildAttendanceHref({
+                  view: "day",
+                  dateYmd: todayAthensYmd(),
+                  filters: { attendanceStatus: "expected" },
+                })}
+                icon={ClipboardCheck}
+                label="Παρουσίες (αναμενόμενες)"
+                value={overview.attendanceSummary.expected}
+              />
+              <WorkflowLink
+                href={buildReportsHref({ status: "open" })}
+                icon={FilePenLine}
+                label="Αναφορές (ανοιχτές)"
+                value={overview.pendingReportCount}
+              />
             </div>
           </section>
 
@@ -352,7 +371,7 @@ function WorkflowLink({
   return (
     <Link
       href={href}
-      className="flex items-center justify-between gap-3 rounded-xl border border-border bg-white px-4 py-3 shadow-sm transition hover:border-clinical-200 hover:bg-clinical-50/40"
+      className="flex min-h-[44px] items-center justify-between gap-3 rounded-xl border border-border bg-white px-4 py-3 shadow-sm transition hover:border-clinical-200 hover:bg-clinical-50/40"
     >
       <span className="flex min-w-0 items-center gap-3">
         <Icon className="h-4 w-4 shrink-0 text-clinical-700" aria-hidden />

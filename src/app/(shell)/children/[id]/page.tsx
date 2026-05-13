@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { ChildDetailBody } from "@/components/children/child-detail-body";
 import { canMutateChildren } from "@/lib/auth/children-permissions";
+import { canMutateSchedule } from "@/lib/auth/schedule-permissions";
 import { canWriteTherapyGoals } from "@/lib/auth/therapy-goals-permissions";
 import { getSessionContext } from "@/lib/auth/get-session-context";
 import {
@@ -68,6 +69,7 @@ export default async function ChildProfilePage({ params }: ChildProfilePageProps
         files,
       }}
       canMutate={canMutate}
+      canScheduleSessions={canMutateSchedule(ctx.roleCodes)}
       canWriteTherapyGoals={canWriteTherapyGoals(ctx.roleCodes)}
       loadWarnings={loadWarnings}
     />
