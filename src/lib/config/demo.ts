@@ -41,11 +41,3 @@ export function getDemoOrganizationId(): string {
   if (raw && UUID_RE.test(raw)) return raw;
   return SEED_DEMO_ORGANIZATION_ID;
 }
-
-export function isDemoDebugPanelVisible(): boolean {
-  if (!getAuthGatingTemporarilyDisabled()) return false;
-  if (process.env.NODE_ENV === "development") return true;
-  const d = envTruthy("DEMO_DEBUG");
-  const p = envTruthy("NEXT_PUBLIC_DEMO_DEBUG");
-  return d === true || p === true;
-}

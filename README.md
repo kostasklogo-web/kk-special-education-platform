@@ -35,13 +35,12 @@ Set these in **Vercel → Project → Settings → Environment Variables** (same
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | **Yes** | Supabase anon key (public; RLS must protect data). |
 | `AUTH_GATING_TEMPORARILY_DISABLED` | Recommended | `true` = MVP demo mode (fixed demo org, no `user_roles` for org id). If **unset**, the app still defaults to demo mode for backwards compatibility; set to `false` when auth is enforced. |
 | `DEMO_ORGANIZATION_ID` | Optional | UUID of the demo organization; must match `supabase/seed.sql` and anon read RLS policies. Omit to use the built-in seed default. |
-| `DEMO_DEBUG` | Optional | `true` shows a **diagnostics strip** on shell pages (env flags + PostgREST errors) when demo gating is on—use on Preview to debug RLS without `NODE_ENV=development`. |
 
-Optional mirrors (only if you need the same values in client bundles): `NEXT_PUBLIC_AUTH_GATING_TEMPORARILY_DISABLED`, `NEXT_PUBLIC_DEMO_ORGANIZATION_ID`, `NEXT_PUBLIC_DEMO_DEBUG`.
+Optional mirrors (only if you need the same values in client bundles): `NEXT_PUBLIC_AUTH_GATING_TEMPORARILY_DISABLED`, `NEXT_PUBLIC_DEMO_ORGANIZATION_ID`.
 
 **Do not** set `SUPABASE_SERVICE_ROLE_KEY` (or any service role material) on Vercel for this Next.js app; the codebase uses only the anon key on the server and client.
 
-Demo anon read policies for the seed organization live in `supabase/migrations/20260513120000_mvp_demo_anon_read_policies.sql`—apply with `npx supabase db push` or the Supabase SQL editor.
+Demo anon read policies for the seed organization live in `supabase/migrations/20260513120000_mvp_demo_anon_read_policies.sql`. The **Supabase schema & migrations** section below lists all migration files (including core tables and policy re-apply). Apply with `npx supabase db push` or the Supabase SQL editor.
 
 ## Local Development
 
