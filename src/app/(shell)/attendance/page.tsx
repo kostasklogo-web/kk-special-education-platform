@@ -42,7 +42,11 @@ export default async function AttendancePage({ searchParams }: AttendancePagePro
   if (orgErr || !organizationId) {
     return (
       <div>
-        <PageHeader title="Παρουσιολόγιο" />
+        <PageHeader
+          eyebrow="Παρουσίες"
+          title="Παρουσιολόγιο"
+          description="Η καταχώρηση παρουσιών συνδέεται με το πρόγραμμα συνεδριών. Ρυθμίστε οργανισμό και κέντρα για να φορτώσει το μητρώο."
+        />
         <EmptyState
           title="Δεν έχει ρυθμιστεί οργανισμός ανάπτυξης"
           description={orgErr ?? "Το παρουσιολόγιο θα εμφανιστεί μόλις υπάρχουν demo δεδομένα οργανισμού, κέντρου και συνεδριών."}
@@ -54,7 +58,7 @@ export default async function AttendancePage({ searchParams }: AttendancePagePro
   if (AUTH_GATING_TEMPORARILY_DISABLED && !(await isSupabaseReachableQuickly())) {
     return (
       <div>
-        <PageHeader title="Παρουσιολόγιο" />
+        <PageHeader eyebrow="Παρουσίες" title="Παρουσιολόγιο" />
         <EmptyState
           title="Δεν υπάρχουν ακόμη demo δεδομένα παρουσιών"
           description="Η τοπική βάση Supabase δεν απαντά ή δεν έχει αρχικοποιηθεί. Το παρουσιολόγιο παραμένει διαθέσιμο ως κενή προβολή σε λειτουργία ανάπτυξης."
@@ -84,10 +88,11 @@ export default async function AttendancePage({ searchParams }: AttendancePagePro
     canRecordAttendanceForSession(ctx.roleCodes, ctx.user?.id ?? null, therapistUserId);
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
+        eyebrow="Καταχώρηση παρουσίας"
         title="Παρουσιολόγιο"
-        description="Παρουσίες συνδεδεμένες με προγραμματισμένες συνεδρίες. Η καταχώρηση ενημερώνει και την κατάσταση της συνεδρίας όπου ορίζεται."
+        description="Παρουσίες δεμένες στο πρόγραμμα συνεδριών. Όπου εφαρμόζεται, η καταχώρηση ενημερώνει και την κατάσταση της συνεδρίας για συνέπεια με τη γραμματεία και τη διοίκηση."
         actions={
           <Link
             href={buildAttendanceHref({
@@ -102,21 +107,25 @@ export default async function AttendancePage({ searchParams }: AttendancePagePro
         }
       />
 
-      <AttendanceViewTabs search={search} />
-      <AttendanceDateNav search={search} />
+      <div className="space-y-4 rounded-2xl border border-border bg-gradient-to-b from-surface-card to-surface-muted/25 p-4 shadow-shell sm:p-5">
+        <AttendanceViewTabs search={search} />
+        <AttendanceDateNav search={search} />
+      </div>
 
       {dataRes.error ? (
-        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900" role="alert">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900 shadow-sm" role="alert">
           {dataRes.error}
         </div>
       ) : null}
 
-      <AttendanceFiltersForm
-        search={search}
-        centers={centersRes.centers}
-        therapists={therapistsRes.therapists}
-        childOptions={childrenRes.children}
-      />
+      <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-shell sm:p-5">
+        <AttendanceFiltersForm
+          search={search}
+          centers={centersRes.centers}
+          therapists={therapistsRes.therapists}
+          childOptions={childrenRes.children}
+        />
+      </div>
 
       {search.view === "day" ? (
         <AttendanceDayPanel

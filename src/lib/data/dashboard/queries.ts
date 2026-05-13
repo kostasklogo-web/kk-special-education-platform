@@ -45,14 +45,14 @@ export type DashboardOverview = {
 
 const DEMO_DASHBOARD_OVERVIEW: DashboardOverview = {
   metrics: [
-    { label: "Ενεργά παιδιά", value: 7, helper: "Φάκελοι σε ενεργό ή προσωρινό πρόγραμμα" },
-    { label: "Γονείς / κηδεμόνες", value: 8, helper: "Συνδεδεμένες οικογένειες" },
-    { label: "Συνεδρίες σήμερα", value: 2, helper: "Πρόγραμμα ημέρας" },
-    { label: "Επόμενες 14 ημέρες", value: 12, helper: "Προγραμματισμένες συνεδρίες" },
-    { label: "Ανοιχτοί στόχοι", value: 7, helper: "Ενεργοί ή σε εξέλιξη" },
-    { label: "Πρόχειρες σημειώσεις", value: 1, helper: "Χρειάζονται ολοκλήρωση" },
-    { label: "Προσωπικό", value: 8, helper: "Ενεργές εγγραφές ομάδας" },
-    { label: "Αίθουσες", value: 5, helper: "Διαθέσιμοι χώροι" },
+    { label: "Ενεργοί φάκελοι παιδιών", value: 7, helper: "Ωφελούμενοι με ενεργό πρόγραμμα στο κέντρο" },
+    { label: "Οικογένειες (γονείς)", value: 8, helper: "Καταχωρημένοι γονείς και κηδεμόνες" },
+    { label: "Συνεδρίες σήμερα", value: 2, helper: "Πρόγραμμα ημέρας ανά κέντρο" },
+    { label: "Πρόγραμμα 14 ημερών", value: 12, helper: "Προγραμματισμένες συνεδρίες (επόμενες δύο εβδομάδες)" },
+    { label: "Ανοιχτοί θεραπευτικοί στόχοι", value: 7, helper: "Στόχοι σε εξέλιξη ή σε αναμονή" },
+    { label: "Σημειώσεις σε πρόχειρο", value: 1, helper: "Απαιτούν ολοκλήρωση ή έλεγχο" },
+    { label: "Θεραπευτική ομάδα", value: 8, helper: "Ενεργά μέλη προσωπικού" },
+    { label: "Αίθουσες θεραπείας", value: 5, helper: "Καταχωρημένοι χώροι παρέμβασης" },
   ],
   todaySessions: [
     {
@@ -111,13 +111,13 @@ const DEMO_DASHBOARD_OVERVIEW: DashboardOverview = {
     made_up: 0,
   },
   occupancy: [
-    { label: "Εύοσμος Θεσσαλονίκης", used: 3, total: 5, helper: "Πρωινή ζώνη με διαθέσιμες αίθουσες" },
-    { label: "Νίκαια", used: 2, total: 5, helper: "Απογευματινή λειτουργία αξιολόγησης" },
+    { label: "Εύοσμος Θεσσαλονίκης", used: 3, total: 5, helper: "Χρήση αιθουσών βάσει σημερινού προγράμματος" },
+    { label: "Νίκαια", used: 2, total: 5, helper: "Απογευματινή ζώνη · διαθέσιμες θέσεις" },
   ],
   therapistWorkloads: [
-    { therapistName: "Μαρία Παπαδοπούλου", discipline: "Λογοθεραπεία", sessions: 4, helper: "2 ολοκληρωμένες, 2 προγραμματισμένες" },
-    { therapistName: "Ανδρέας Νικολάου", discipline: "Εργοθεραπεία", sessions: 3, helper: "1 εκκρεμής παρουσία" },
-    { therapistName: "Ιωάννα Ράπτη", discipline: "Ειδική Διαπαιδαγώγηση", sessions: 3, helper: "2 ατομικές, 1 αναπλήρωση" },
+    { therapistName: "Μαρία Παπαδοπούλου", discipline: "Λογοθεραπεία", sessions: 4, helper: "Δύο ολοκληρωμένες, δύο προγραμματισμένες" },
+    { therapistName: "Ανδρέας Νικολάου", discipline: "Εργοθεραπεία", sessions: 3, helper: "Μία εκκρεμής καταχώρηση παρουσίας" },
+    { therapistName: "Ιωάννα Ράπτη", discipline: "Ειδική Διαπαιδαγώγηση", sessions: 3, helper: "Δύο ατομικές, μία αναπλήρωση" },
   ],
   openGoalCount: 7,
   draftNoteCount: 1,
@@ -238,44 +238,44 @@ async function getLiveDashboardOverview(organizationId: string): Promise<Dashboa
   return {
     metrics: [
       {
-        label: "Ενεργά παιδιά",
+        label: "Ενεργοί φάκελοι παιδιών",
         value: childrenCount.count,
-        helper: "Φάκελοι ωφελούμενων στο κέντρο",
+        helper: "Ωφελούμενοι με ενεργό πρόγραμμα στο κέντρο",
       },
       {
-        label: "Γονείς / κηδεμόνες",
+        label: "Οικογένειες (γονείς)",
         value: parentsCount.count,
-        helper: "Συνδεδεμένες οικογένειες",
+        helper: "Καταχωρημένοι γονείς και κηδεμόνες",
       },
       {
         label: "Συνεδρίες σήμερα",
         value: todaySessions.items.length,
-        helper: "Πρόγραμμα ημέρας",
+        helper: "Πρόγραμμα ημέρας ανά κέντρο",
       },
       {
-        label: "Επόμενες 14 ημέρες",
+        label: "Πρόγραμμα 14 ημερών",
         value: upcomingSessions.items.length,
-        helper: "Προγραμματισμένες συνεδρίες",
+        helper: "Προγραμματισμένες συνεδρίες (επόμενες δύο εβδομάδες)",
       },
       {
-        label: "Ανοιχτοί στόχοι",
+        label: "Ανοιχτοί θεραπευτικοί στόχοι",
         value: openGoals.count,
-        helper: "Ενεργοί ή σε εξέλιξη",
+        helper: "Στόχοι σε εξέλιξη ή σε αναμονή",
       },
       {
-        label: "Πρόχειρες σημειώσεις",
+        label: "Σημειώσεις σε πρόχειρο",
         value: draftNotes.count,
-        helper: "Χρειάζονται ολοκλήρωση",
+        helper: "Απαιτούν ολοκλήρωση ή έλεγχο",
       },
       {
-        label: "Προσωπικό",
+        label: "Θεραπευτική ομάδα",
         value: staffCount.count,
-        helper: "Ενεργές εγγραφές ομάδας",
+        helper: "Ενεργά μέλη προσωπικού",
       },
       {
-        label: "Αίθουσες",
+        label: "Αίθουσες θεραπείας",
         value: roomsCount.count,
-        helper: "Διαθέσιμοι χώροι",
+        helper: "Καταχωρημένοι χώροι παρέμβασης",
       },
     ],
     todaySessions: todaySessions.items.slice(0, 6),
@@ -284,14 +284,14 @@ async function getLiveDashboardOverview(organizationId: string): Promise<Dashboa
       label,
       used,
       total: Math.max(roomsCount.count, todayRoomIds.size, 1),
-      helper: "Συνεδρίες ημέρας ανά τοποθεσία",
+      helper: "Χρήση χώρων βάσει σημερινού προγράμματος",
     })),
     therapistWorkloads: [...workloadByTherapist.entries()]
       .map(([therapistName, value]) => ({
         therapistName,
         discipline: value.discipline,
         sessions: value.sessions,
-        helper: value.sessions >= 5 ? "Υψηλή εβδομαδιαία φόρτιση" : "Κανονική φόρτιση MVP",
+        helper: value.sessions >= 5 ? "Αυξημένη εβδομαδιαία φόρτιση" : "Φόρτιση εντός τυπικών ορίων",
       }))
       .sort((a, b) => b.sessions - a.sessions)
       .slice(0, 5),

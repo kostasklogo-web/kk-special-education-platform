@@ -5,11 +5,11 @@ type ChildSearchBarProps = {
 /** Απλή αναζήτηση (όνομα / επώνυμο). Φίλτρα ανά κέντρο: σύντομα. */
 export function ChildSearchBar({ defaultQuery = "" }: ChildSearchBarProps) {
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-border bg-surface-card p-4 shadow-shell sm:flex-row sm:items-end sm:justify-between">
-      <form method="get" className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-end">
+    <div className="rounded-2xl border border-border bg-gradient-to-b from-surface-card to-surface-muted/20 p-4 shadow-shell sm:flex sm:flex-row sm:items-end sm:justify-between sm:gap-4 sm:p-5">
+      <form method="get" className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-end">
         <div className="min-w-0 flex-1">
-          <label htmlFor="child-search" className="mb-1 block text-xs font-medium text-ink-muted">
-            Αναζήτηση
+          <label htmlFor="child-search" className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-ink-faint">
+            Αναζήτηση ωφελούμενων
           </label>
           <input
             id="child-search"
@@ -22,9 +22,9 @@ export function ChildSearchBar({ defaultQuery = "" }: ChildSearchBarProps) {
         </div>
         <button
           type="submit"
-          className="shrink-0 rounded-lg border border-border bg-white px-4 py-2 text-sm font-medium text-ink shadow-sm hover:bg-surface-muted"
+          className="shrink-0 rounded-lg border border-border bg-white px-4 py-2 text-sm font-medium text-ink shadow-sm transition hover:border-clinical-200 hover:bg-clinical-50/50"
         >
-          Εφαρμογή
+          Αναζήτηση
         </button>
       </form>
       <div className="flex shrink-0 items-center gap-2">

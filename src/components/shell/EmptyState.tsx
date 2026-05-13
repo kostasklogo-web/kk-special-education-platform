@@ -17,15 +17,15 @@ export function EmptyState({
 }: EmptyStateProps) {
   return (
     <div
-      className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border bg-surface-muted/50 px-6 py-16 text-center"
+      className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/90 bg-gradient-to-b from-surface-muted/40 to-surface-card px-6 py-16 text-center"
       role="status"
     >
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-shell">
-        <Icon className="h-6 w-6 text-ink-faint" aria-hidden />
+      <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-clinical-100 bg-white shadow-shell">
+        <Icon className="h-6 w-6 text-clinical-700/70" aria-hidden />
       </div>
-      <h2 className="text-base font-medium text-ink">{title}</h2>
-      <p className="mt-2 max-w-md text-sm leading-6 text-ink-muted">{description}</p>
-      {action ? <div className="mt-6">{action}</div> : null}
+      <h2 className="text-base font-semibold text-ink">{title}</h2>
+      <p className="mt-2 max-w-md text-sm leading-relaxed text-ink-muted">{description}</p>
+      {action ? <div className="mt-7">{action}</div> : null}
     </div>
   );
 }

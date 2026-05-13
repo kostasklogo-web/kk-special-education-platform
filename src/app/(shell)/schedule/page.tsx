@@ -41,7 +41,11 @@ export default async function SchedulePage({ searchParams }: SchedulePageProps) 
   if (orgErr || !organizationId) {
     return (
       <div>
-        <PageHeader title="Πρόγραμμα συνεδριών" />
+        <PageHeader
+          eyebrow="Πρόγραμμα"
+          title="Συνεδρίες"
+          description="Η προβολή ενεργοποιείται αφού ρυθμιστεί ο οργανισμός επίδειξης και τα κέντρα στη βάση."
+        />
         <EmptyState
           title="Δεν έχει ρυθμιστεί οργανισμός ανάπτυξης"
           description={orgErr ?? "Το πρόγραμμα θα εμφανιστεί μόλις υπάρχουν demo δεδομένα οργανισμού και κέντρου."}
@@ -53,7 +57,7 @@ export default async function SchedulePage({ searchParams }: SchedulePageProps) 
   if (AUTH_GATING_TEMPORARILY_DISABLED && !(await isSupabaseReachableQuickly())) {
     return (
       <div>
-        <PageHeader title="Πρόγραμμα συνεδριών" />
+        <PageHeader eyebrow="Πρόγραμμα" title="Συνεδρίες" />
         <EmptyState
           title="Δεν υπάρχουν ακόμη demo δεδομένα προγράμματος"
           description="Η τοπική βάση Supabase δεν απαντά ή δεν έχει αρχικοποιηθεί. Το πρόγραμμα παραμένει διαθέσιμο ως κενή προβολή σε λειτουργία ανάπτυξης."
@@ -91,10 +95,11 @@ export default async function SchedulePage({ searchParams }: SchedulePageProps) 
   const canNew = canMutateSchedule(ctx.roleCodes);
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
-        title="Πρόγραμμα συνεδριών"
-        description="Προβολή και διαχείριση συνεδριών ανά κέντρο, θεραπευτή και παιδί. Η πρόσβαση ελέγχεται από τους ρόλους και το Supabase RLS."
+        eyebrow="Πρόγραμμα λειτουργίας"
+        title="Συνεδρίες"
+        description="Ημερήσια, εβδομαδιαία και λίστα συνεδριών ανά κέντρο, θεραπευτή, ωφελούμενο και ειδικότητα. Η πρόσβαση και οι αλλαγές ελέγχονται από τους ρόλους και τις πολιτικές της βάσης."
         actions={
           <div className="flex flex-wrap gap-2">
             <Link
@@ -119,23 +124,27 @@ export default async function SchedulePage({ searchParams }: SchedulePageProps) 
         }
       />
 
-      <ScheduleViewTabs search={search} />
-      <ScheduleDateNav search={search} />
+      <div className="space-y-4 rounded-2xl border border-border bg-gradient-to-b from-surface-card to-surface-muted/25 p-4 shadow-shell sm:p-5">
+        <ScheduleViewTabs search={search} />
+        <ScheduleDateNav search={search} />
+      </div>
 
       {sessionsRes.error ? (
-        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900" role="alert">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900 shadow-sm" role="alert">
           {sessionsRes.error}
         </div>
       ) : null}
 
-      <ScheduleFiltersForm
-        search={search}
-        centers={centersRes.centers}
-        therapists={therapistsRes.therapists}
-        childOptions={childrenRes.children}
-        rooms={roomsRes.rooms}
-        disciplines={disciplinesRes.disciplines}
-      />
+      <div className="rounded-2xl border border-border bg-surface-card p-4 shadow-shell sm:p-5">
+        <ScheduleFiltersForm
+          search={search}
+          centers={centersRes.centers}
+          therapists={therapistsRes.therapists}
+          childOptions={childrenRes.children}
+          rooms={roomsRes.rooms}
+          disciplines={disciplinesRes.disciplines}
+        />
+      </div>
 
       {search.view === "week" ? (
         <ScheduleWeekPanel items={sessionsRes.items} anchorYmd={search.dateYmd} />

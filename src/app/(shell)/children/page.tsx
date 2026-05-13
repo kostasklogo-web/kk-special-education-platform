@@ -21,11 +21,28 @@ export default async function ChildrenPage({ searchParams }: ChildrenPageProps) 
     ? { items: [], error: null }
     : await listChildren({ search: q });
 
+  const listedCount = items.length;
+
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
-        title="Λίστα παιδιών"
-        description="Διαχείριση ωφελούμενων ανά οργανισμό και κέντρο. Η πρόσβαση σε εγγραφές ελέγχεται από Supabase RLS και το ρόλο σας."
+        eyebrow="Μητρώο ωφελούμενων"
+        title="Παιδιά και πρόγραμμα"
+        description="Κεντρικό μητρώο ωφελούμενων ανά οργανισμό και κέντρο λειτουργίας. Η πρόσβαση στις εγγραφές ρυθμίζεται από τους ρόλους και τις πολιτικές ασφαλείας της βάσης."
+        meta={
+          !supabaseUnavailable && !error ? (
+            <span>
+              Εμφανίζονται <strong className="font-semibold text-ink-muted">{listedCount}</strong> εγγραφές
+              {q ? (
+                <>
+                  {" "}
+                  για «<span className="font-medium text-ink">{q}</span>»
+                </>
+              ) : null}
+              .
+            </span>
+          ) : null
+        }
         actions={
           canMutate ? (
             <Link
@@ -39,26 +56,24 @@ export default async function ChildrenPage({ searchParams }: ChildrenPageProps) 
       />
 
       {!canMutate ? (
-        <div className="mb-6 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-950">
-          <strong>Προβολή:</strong> Ο ρόλος σας επιτρέπει μόνο ανάγνωση (π.χ. θεραπευτής ή επόπτης). Η
-          προσθήκη και η επεξεργασία παιδιών απαιτεί <strong>γραμματεία</strong> ή <strong>διοίκηση</strong>.
+        <div className="rounded-xl border border-sky-200/90 bg-gradient-to-r from-sky-50 to-white px-4 py-3 text-sm leading-relaxed text-sky-950 shadow-sm">
+          <strong className="font-semibold">Λειτουργία προβολής:</strong> Ο ρόλος σας επιτρέπει μόνο ανάγνωση (π.χ. θεραπευτής ή
+          επόπτης). Η προσθήκη και η επεξεργασία φακέλων απαιτεί <strong>γραμματεία</strong> ή <strong>διοίκηση</strong>.
         </div>
       ) : null}
 
       {error ? (
-        <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900" role="alert">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900 shadow-sm" role="alert">
           {error}
         </div>
       ) : null}
 
-      <div className="mb-6">
-        <ChildSearchBar defaultQuery={q} />
-      </div>
+      <ChildSearchBar defaultQuery={q} />
 
       {supabaseUnavailable ? (
         <EmptyState
-          title="Δεν υπάρχουν ακόμη demo δεδομένα παιδιών"
-          description="Η τοπική βάση Supabase δεν απαντά ή δεν έχει αρχικοποιηθεί. Η σελίδα παραμένει διαθέσιμη σε λειτουργία ανάπτυξης."
+          title="Δεν είναι διαθέσιμο το μητρώο παιδιών"
+          description="Η σύνδεση με τη βάση Supabase δεν απαντά ή το περιβάλλον δεν έχει αρχικοποιηθεί. Εκτελέστε migrations και seed για να φορτώσουν οι εγγραφές επίδειξης."
         />
       ) : (
         <ChildListTable items={items} canMutate={canMutate} />

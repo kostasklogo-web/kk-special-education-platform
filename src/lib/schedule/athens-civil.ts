@@ -89,3 +89,15 @@ export function formatAthensWeekdayShortEl(iso: string): string {
     weekday: "short",
   }).format(new Date(iso));
 }
+
+/** Long Greek date for Athens civil `ymd` (YYYY-MM-DD), e.g. dashboard headings. */
+export function formatAthensLongDateFromYmd(ymd: string): string {
+  const iso = athensStartOfDayUtcIso(ymd);
+  return new Intl.DateTimeFormat("el-GR", {
+    timeZone: TZ,
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(iso));
+}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { UsersRound } from "lucide-react";
 import type { ChildListItem } from "@/lib/data/children/types";
 import { CHILD_STATUS_LABELS, formatDateEl } from "@/lib/ui/child-labels";
 
@@ -10,17 +11,21 @@ type ChildListTableProps = {
 export function ChildListTable({ items, canMutate }: ChildListTableProps) {
   if (items.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-border bg-surface-muted/40 px-6 py-14 text-center">
-        <p className="text-sm font-medium text-ink">Δεν υπάρχουν εγγραφές παιδιών</p>
-        <p className="mt-2 text-sm text-ink-muted">
-          Δεν βρέθηκαν παιδιά με τα τρέχοντα φίλτρα. Προσθέστε νέα εγγραφή αν έχετε δικαίωμα.
+      <div className="rounded-2xl border border-dashed border-border/90 bg-gradient-to-b from-surface-muted/30 to-surface-card px-6 py-16 text-center shadow-shell">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-clinical-100 bg-white shadow-sm">
+          <UsersRound className="h-6 w-6 text-clinical-700/70" aria-hidden />
+        </div>
+        <p className="text-sm font-semibold text-ink">Δεν βρέθηκαν εγγραφές</p>
+        <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-ink-muted">
+          Δεν υπάρχουν ωφελούμενοι με τα τρέχοντα κριτήρια αναζήτησης. Δοκιμάστε άλλο όνομα ή επώνυμο, ή προσθέστε νέο φάκελο
+          εφόσον έχετε δικαίωμα.
         </p>
         {canMutate ? (
           <Link
             href="/children/new"
-            className="mt-6 inline-flex rounded-lg bg-clinical-600 px-4 py-2 text-sm font-semibold text-white hover:bg-clinical-700"
+            className="mt-8 inline-flex rounded-lg bg-clinical-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-clinical-700"
           >
-            Προσθήκη παιδιού
+            Νέος φάκελος παιδιού
           </Link>
         ) : null}
       </div>
@@ -28,27 +33,27 @@ export function ChildListTable({ items, canMutate }: ChildListTableProps) {
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-surface-card shadow-shell">
+    <div className="overflow-hidden rounded-2xl border border-border bg-surface-card shadow-shell">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-border text-left text-sm">
-          <thead className="bg-surface-muted/80">
+          <thead className="bg-surface-muted/90">
             <tr>
-              <th scope="col" className="px-4 py-3 font-semibold text-ink">
+              <th scope="col" className="px-4 py-3.5 text-xs font-semibold uppercase tracking-wide text-ink-muted">
                 Επώνυμο
               </th>
-              <th scope="col" className="px-4 py-3 font-semibold text-ink">
+              <th scope="col" className="px-4 py-3.5 text-xs font-semibold uppercase tracking-wide text-ink-muted">
                 Όνομα
               </th>
-              <th scope="col" className="hidden px-4 py-3 font-semibold text-ink sm:table-cell">
+              <th scope="col" className="hidden px-4 py-3.5 text-xs font-semibold uppercase tracking-wide text-ink-muted sm:table-cell">
                 Ημ. γέννησης
               </th>
-              <th scope="col" className="hidden px-4 py-3 font-semibold text-ink md:table-cell">
+              <th scope="col" className="hidden px-4 py-3.5 text-xs font-semibold uppercase tracking-wide text-ink-muted md:table-cell">
                 Κέντρο
               </th>
-              <th scope="col" className="px-4 py-3 font-semibold text-ink">
+              <th scope="col" className="px-4 py-3.5 text-xs font-semibold uppercase tracking-wide text-ink-muted">
                 Κατάσταση
               </th>
-              <th scope="col" className="px-4 py-3 text-right font-semibold text-ink">
+              <th scope="col" className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wide text-ink-muted">
                 Ενέργειες
               </th>
             </tr>
