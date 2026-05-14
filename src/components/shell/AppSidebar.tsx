@@ -115,11 +115,11 @@ export function AppSidebar({ roleCodes }: AppSidebarProps) {
       <aside
         id="app-sidebar"
         className={[
-          "fixed bottom-0 left-0 top-0 z-30 flex w-[var(--shell-sidebar)] flex-col border-r border-border bg-surface-card shadow-shell transition-transform md:translate-x-0",
+          "fixed bottom-0 left-0 top-0 z-30 flex w-[var(--shell-sidebar)] min-h-0 flex-col border-r border-border bg-surface-card shadow-shell transition-transform md:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         ].join(" ")}
       >
-        <div className="flex h-[4.25rem] items-center border-b border-border bg-gradient-to-r from-surface-card to-surface-muted/30 px-4">
+        <div className="flex h-[4.25rem] shrink-0 items-center border-b border-border bg-gradient-to-r from-surface-card to-surface-muted/30 px-4">
           <Link href="/dashboard" className="min-w-0" onClick={() => setOpen(false)}>
             <span className="block truncate text-[10px] font-semibold uppercase tracking-[0.22em] text-clinical-700">
               Ειδική αγωγή & παρέμβαση
@@ -128,8 +128,8 @@ export function AppSidebar({ roleCodes }: AppSidebarProps) {
             <span className="block truncate text-[11px] text-ink-muted">Πολυθεματική πλατφόρμα SaaS</span>
           </Link>
         </div>
-        {nav}
-        <div className="mt-auto border-t border-border bg-surface-muted/40 p-3 text-[11px] leading-relaxed text-ink-faint">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">{nav}</div>
+        <div className="mt-auto shrink-0 border-t border-border bg-surface-muted/40 p-3 text-[11px] leading-relaxed text-ink-faint">
           Περιβάλλον επίδειξης · Μόνο δοκιμαστικά ή ανωνυμοποιημένα δεδομένα.
         </div>
       </aside>

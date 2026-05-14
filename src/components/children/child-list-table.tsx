@@ -34,7 +34,7 @@ export function ChildListTable({ items, canMutate }: ChildListTableProps) {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-surface-card shadow-shell">
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto overscroll-x-contain [-webkit-overflow-scrolling:touch]">
         <table className="min-w-full divide-y divide-border text-left text-sm">
           <thead className="bg-surface-muted/90">
             <tr>

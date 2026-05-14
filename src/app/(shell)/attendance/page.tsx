@@ -24,6 +24,7 @@ import { AttendanceViewTabs } from "@/components/attendance/attendance-view-tabs
 import { athensDayRange, athensWeekRangeFromWeekContaining } from "@/lib/schedule/range";
 import { buildAttendanceHref, parseAttendanceSearchParams } from "@/lib/attendance/search-params";
 import { todayAthensYmd } from "@/lib/schedule/athens-civil";
+import { buildScheduleHref } from "@/lib/schedule/search-params";
 
 type AttendancePageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -94,16 +95,24 @@ export default async function AttendancePage({ searchParams }: AttendancePagePro
         title="Παρουσιολόγιο"
         description="Παρουσίες δεμένες στο πρόγραμμα συνεδριών. Όπου εφαρμόζεται, η καταχώρηση ενημερώνει και την κατάσταση της συνεδρίας για συνέπεια με τη γραμματεία και τη διοίκηση."
         actions={
-          <Link
-            href={buildAttendanceHref({
-              view: search.view,
-              dateYmd: todayAthensYmd(),
-              filters: search.filters,
-            })}
-            className="rounded-lg border border-border bg-white px-4 py-2 text-sm font-medium text-ink shadow-sm hover:bg-surface-muted"
-          >
-            Σήμερα
-          </Link>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
+            <Link
+              href={buildAttendanceHref({
+                view: search.view,
+                dateYmd: todayAthensYmd(),
+                filters: search.filters,
+              })}
+              className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-lg border border-border bg-white px-4 py-2 text-center text-sm font-medium text-ink shadow-sm hover:bg-surface-muted sm:flex-initial"
+            >
+              Σήμερα
+            </Link>
+            <Link
+              href={buildScheduleHref({ view: "day", dateYmd: search.dateYmd, filters: {} })}
+              className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-lg border border-clinical-200 bg-clinical-50 px-4 py-2 text-center text-sm font-semibold text-clinical-900 shadow-sm hover:bg-clinical-100/80 sm:flex-initial"
+            >
+              Πρόγραμμα ημέρας
+            </Link>
+          </div>
         }
       />
 

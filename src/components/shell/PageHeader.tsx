@@ -30,7 +30,9 @@ export function PageHeader({ eyebrow, title, description, meta, actions }: PageH
         ) : null}
         {meta ? <div className="mt-3 text-xs text-ink-faint">{meta}</div> : null}
       </div>
-      {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
+      {actions ? (
+        <div className="flex w-full min-w-0 flex-wrap items-stretch gap-2 sm:w-auto sm:items-center">{actions}</div>
+      ) : null}
     </header>
   );
 }

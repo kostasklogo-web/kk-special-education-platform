@@ -25,7 +25,7 @@ export function OperationalAlertCards({ items }: { items: DashboardOperationalAl
             key={item.id}
             href={item.href}
             className={[
-              "group relative flex flex-col rounded-2xl border p-4 transition hover:shadow-md sm:p-5",
+              "group relative flex min-h-[9.5rem] flex-col rounded-2xl border p-4 transition hover:shadow-md sm:p-5",
               tone,
             ].join(" ")}
           >
@@ -42,7 +42,7 @@ export function OperationalAlertCards({ items }: { items: DashboardOperationalAl
             <p className="text-[11px] font-semibold uppercase leading-tight tracking-[0.12em] text-ink-faint">{item.label}</p>
             <p className="mt-2 text-3xl font-semibold tabular-nums tracking-tight text-ink">{item.value}</p>
             <p className="mt-2 text-sm leading-snug text-ink-muted">{item.helper}</p>
-            <span className="mt-3 text-xs font-semibold text-clinical-700 group-hover:underline">Μετάβαση →</span>
+            <span className="mt-auto pt-3 text-xs font-semibold text-clinical-700 group-hover:underline">Μετάβαση →</span>
           </Link>
         );
       })}

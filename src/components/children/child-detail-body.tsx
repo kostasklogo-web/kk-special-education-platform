@@ -126,21 +126,36 @@ export function ChildDetailBody({
           label="Στόχοι"
           value={counts.goals}
           helper={counts.goals === 0 ? "Χρειάζεται θεραπευτικό πλάνο" : "Συνδεδεμένοι με πλάνα"}
+          href={buildTherapyGoalsHref({ childId: child.id })}
+          linkHint="Άνοιγμα στόχων"
         />
         <ProfileMetricCard
           label="Συνεδρίες"
           value={counts.sessions}
           helper="Ιστορικό και πρόγραμμα"
+          href={buildScheduleHref({
+            view: "list",
+            dateYmd: todayAthensYmd(),
+            filters: { childId: child.id },
+          })}
+          linkHint="Άνοιγμα προγράμματος"
         />
         <ProfileMetricCard
           label="Σημειώσεις"
           value={counts.sessionNotes}
           helper="Κλινική τεκμηρίωση"
+          href={buildSessionNotesHref({
+            dateYmd: todayAthensYmd(),
+            filters: { childId: child.id },
+          })}
+          linkHint="Άνοιγμα σημειώσεων"
         />
         <ProfileMetricCard
           label="Αναφορές"
           value={counts.reports}
           helper="Πρόοδος προς οικογένεια"
+          href={buildReportsHref({ childId: child.id })}
+          linkHint="Άνοιγμα αναφορών"
         />
       </div>
 
@@ -372,16 +387,40 @@ function ProfileMetricCard({
   label,
   value,
   helper,
+  href,
+  linkHint,
 }: {
   label: string;
   value: string | number;
   helper: string;
+  href?: string;
+  linkHint?: string;
 }) {
-  return (
-    <div className="rounded-2xl border border-border bg-gradient-to-b from-surface-card to-surface-muted/20 p-4 shadow-shell sm:p-5">
+  const body = (
+    <>
       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-faint">{label}</p>
       <p className="mt-2 text-xl font-semibold tabular-nums text-ink sm:text-2xl">{value}</p>
       <p className="mt-1.5 text-xs leading-relaxed text-ink-muted">{helper}</p>
+      {href && linkHint ? (
+        <p className="mt-3 text-xs font-semibold text-clinical-700 group-hover:underline">{linkHint} →</p>
+      ) : null}
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        className="group flex min-h-[7.5rem] flex-col rounded-2xl border border-border bg-gradient-to-b from-surface-card to-surface-muted/20 p-4 shadow-shell transition hover:border-clinical-200 hover:shadow-md sm:p-5"
+      >
+        {body}
+      </Link>
+    );
+  }
+
+  return (
+    <div className="flex min-h-[7.5rem] flex-col rounded-2xl border border-border bg-gradient-to-b from-surface-card to-surface-muted/20 p-4 shadow-shell sm:p-5">
+      {body}
     </div>
   );
 }

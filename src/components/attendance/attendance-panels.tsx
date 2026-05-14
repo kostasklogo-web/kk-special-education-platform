@@ -19,21 +19,21 @@ function AttendanceRowActions({ row, canRecord }: { row: AttendanceSessionRow; c
     <div className="flex flex-wrap items-center justify-end gap-1.5">
       <Link
         href={`/attendance/${row.id}`}
-        className="inline-flex min-h-[36px] min-w-[36px] items-center rounded-lg border border-transparent px-2 py-1.5 text-xs font-medium text-clinical-700 hover:border-clinical-100 hover:bg-clinical-50/60"
+        className="inline-flex min-h-[40px] min-w-[40px] items-center justify-center rounded-lg border border-transparent px-2 py-2 text-xs font-medium text-clinical-700 hover:border-clinical-100 hover:bg-clinical-50/60 sm:min-h-[44px]"
       >
         Προβολή
       </Link>
       {canRecord ? (
         <Link
           href={`/attendance/${row.id}/edit`}
-          className="inline-flex min-h-[36px] items-center rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700"
+          className="inline-flex min-h-[40px] items-center justify-center rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 sm:min-h-[44px]"
         >
           Καταχώρηση
         </Link>
       ) : null}
       <Link
         href={`/schedule/${row.id}`}
-        className="inline-flex min-h-[36px] items-center rounded-lg border border-border bg-white px-2 py-1.5 text-xs font-medium text-ink-muted hover:bg-surface-muted"
+        className="inline-flex min-h-[40px] items-center justify-center rounded-lg border border-border bg-white px-2 py-2 text-xs font-medium text-ink-muted hover:bg-surface-muted sm:min-h-[44px]"
       >
         Πρόγραμμα
       </Link>
@@ -66,7 +66,7 @@ export function AttendanceDayPanel({
   return (
     <div className="space-y-4">
       <AttendanceSummaryStrip items={dayItems} />
-      <div className="overflow-x-auto rounded-xl border border-border bg-surface-card shadow-shell">
+      <div className="overflow-x-auto overscroll-x-contain rounded-xl border border-border bg-surface-card shadow-shell [-webkit-overflow-scrolling:touch]">
       <table className="min-w-full divide-y divide-border text-sm">
         <thead className="bg-surface-muted/50 text-left text-xs font-semibold uppercase text-ink-muted">
           <tr>
@@ -132,7 +132,7 @@ export function AttendanceWeekListPanel({
   return (
     <div className="space-y-4">
       <AttendanceSummaryStrip items={sorted} />
-      <div className="overflow-x-auto rounded-xl border border-border bg-surface-card shadow-shell">
+      <div className="overflow-x-auto overscroll-x-contain rounded-xl border border-border bg-surface-card shadow-shell [-webkit-overflow-scrolling:touch]">
       <table className="min-w-full divide-y divide-border text-sm">
         <thead className="bg-surface-muted/50 text-left text-xs font-semibold uppercase text-ink-muted">
           <tr>

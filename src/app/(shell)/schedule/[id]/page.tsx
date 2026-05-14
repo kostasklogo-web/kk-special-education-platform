@@ -61,25 +61,25 @@ export default async function SessionDetailPage({ params }: SessionDetailPagePro
     <div>
       <PageHeader
         title="Προβολή συνεδρίας"
-        description="Στοιχεία ραντεβού και κατάσταση."
+        description="Στοιχεία ραντεβού, παρουσία και τεκμηρίωση — οι ενέργειες προσαρμόζονται στον ρόλο σας."
         actions={
-          <div className="flex flex-wrap gap-2">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center">
             <Link
               href="/schedule"
-              className="rounded-lg border border-border bg-white px-4 py-2 text-sm font-medium text-ink shadow-sm hover:bg-surface-muted"
+              className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-lg border border-border bg-white px-4 py-2 text-center text-sm font-medium text-ink shadow-sm hover:bg-surface-muted sm:flex-initial"
             >
               Πρόγραμμα
             </Link>
             <Link
               href={`/children/${session.child_id}`}
-              className="rounded-lg border border-border bg-white px-4 py-2 text-sm font-medium text-ink shadow-sm hover:bg-surface-muted"
+              className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-lg border border-border bg-white px-4 py-2 text-center text-sm font-medium text-ink shadow-sm hover:bg-surface-muted sm:flex-initial"
             >
               Προφίλ παιδιού
             </Link>
             {showEdit ? (
               <Link
                 href={`/schedule/${session.id}/edit`}
-                className="inline-flex rounded-lg bg-clinical-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-clinical-700"
+                className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-lg bg-clinical-600 px-4 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-clinical-700 sm:flex-initial"
               >
                 Επεξεργασία
               </Link>
@@ -87,7 +87,7 @@ export default async function SessionDetailPage({ params }: SessionDetailPagePro
             {showAttendanceModule ? (
               <Link
                 href={`/attendance/${session.id}`}
-                className="rounded-lg border border-border bg-white px-4 py-2 text-sm font-medium text-ink shadow-sm hover:bg-surface-muted"
+                className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-lg border border-border bg-white px-4 py-2 text-center text-sm font-medium text-ink shadow-sm hover:bg-surface-muted sm:flex-initial"
               >
                 Παρουσία
               </Link>
@@ -95,7 +95,7 @@ export default async function SessionDetailPage({ params }: SessionDetailPagePro
             {showAttendanceEdit ? (
               <Link
                 href={`/attendance/${session.id}/edit`}
-                className="inline-flex rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-800"
+                className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-lg bg-emerald-700 px-4 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-emerald-800 sm:flex-initial"
               >
                 Καταχώρηση παρουσίας
               </Link>
@@ -103,7 +103,7 @@ export default async function SessionDetailPage({ params }: SessionDetailPagePro
             {showSessionNotes ? (
               <Link
                 href={sessionNotesForChildHref}
-                className="rounded-lg border border-border bg-white px-4 py-2 text-sm font-medium text-ink shadow-sm hover:bg-surface-muted"
+                className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-lg border border-border bg-white px-4 py-2 text-center text-sm font-medium text-ink shadow-sm hover:bg-surface-muted sm:flex-initial"
               >
                 Σημειώσεις (αυτό το παιδί)
               </Link>
@@ -111,7 +111,7 @@ export default async function SessionDetailPage({ params }: SessionDetailPagePro
             {showSessionNotesWrite ? (
               <Link
                 href="/session-notes/new"
-                className="inline-flex rounded-lg bg-slate-700 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800"
+                className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-lg bg-slate-700 px-4 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-slate-800 sm:flex-initial"
               >
                 Νέα σημείωση
               </Link>

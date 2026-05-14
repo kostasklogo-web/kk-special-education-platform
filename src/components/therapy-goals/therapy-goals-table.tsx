@@ -20,18 +20,18 @@ export function TherapyGoalsTable({
   }
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-border bg-surface-card shadow-shell">
+    <div className="overflow-x-auto overscroll-x-contain rounded-xl border border-border bg-surface-card shadow-shell [-webkit-overflow-scrolling:touch]">
       <table className="min-w-full divide-y divide-border text-sm">
         <thead className="bg-surface-muted/50 text-left text-xs font-semibold uppercase text-ink-muted">
           <tr>
             <th className="px-4 py-3">Τίτλος</th>
             <th className="px-4 py-3">Παιδί</th>
-            <th className="px-4 py-3">Πλάνο</th>
-            <th className="px-4 py-3">Ειδικότητα</th>
-            <th className="px-4 py-3">Θεραπευτής</th>
+            <th className="hidden px-4 py-3 md:table-cell">Πλάνο</th>
+            <th className="hidden px-4 py-3 lg:table-cell">Ειδικότητα</th>
+            <th className="hidden px-4 py-3 xl:table-cell">Θεραπευτής</th>
             <th className="px-4 py-3">Κατάσταση</th>
-            <th className="px-4 py-3">Προτεραιότητα</th>
-            {canEdit ? <th className="px-4 py-3">Ενέργειες</th> : null}
+            <th className="hidden px-4 py-3 sm:table-cell">Προτεραιότητα</th>
+            {canEdit ? <th className="px-4 py-3 text-right">Ενέργειες</th> : null}
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
@@ -47,11 +47,11 @@ export function TherapyGoalsTable({
                   {row.child_name}
                 </Link>
               </td>
-              <td className="px-4 py-2 text-ink-muted">{row.plan_title ?? "—"}</td>
-              <td className="px-4 py-2 text-ink-muted">{row.discipline_name_el ?? row.discipline_code}</td>
-              <td className="px-4 py-2 text-ink-muted">{row.therapist_name ?? "—"}</td>
+              <td className="hidden px-4 py-2 text-ink-muted md:table-cell">{row.plan_title ?? "—"}</td>
+              <td className="hidden px-4 py-2 text-ink-muted lg:table-cell">{row.discipline_name_el ?? row.discipline_code}</td>
+              <td className="hidden px-4 py-2 text-ink-muted xl:table-cell">{row.therapist_name ?? "—"}</td>
               <td className="px-4 py-2 text-ink-muted">{therapyGoalStatusLabelEl(row.status)}</td>
-              <td className="px-4 py-2 text-ink-muted">{therapyGoalPriorityLabelEl(row.priority)}</td>
+              <td className="hidden px-4 py-2 text-ink-muted sm:table-cell">{therapyGoalPriorityLabelEl(row.priority)}</td>
               {canEdit ? (
                 <td className="px-4 py-2">
                   <Link

@@ -127,7 +127,7 @@ export default async function DashboardPage() {
         </div>
       ) : null}
 
-      <DashboardQuickActions />
+      <DashboardQuickActions desk={isClinicalTherapistDesk ? "clinical" : "operations"} />
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {overview.metrics.map((metric, i) => (

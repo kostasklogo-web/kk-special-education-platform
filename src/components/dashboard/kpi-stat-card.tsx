@@ -15,7 +15,7 @@ type KpiStatCardProps = {
 
 export function KpiStatCard({ label, value, helper, icon: Icon, emphasis, href, variant = "default" }: KpiStatCardProps) {
   const shell = [
-    "relative overflow-hidden rounded-2xl border p-5 shadow-shell transition-shadow",
+    "relative flex min-h-[9.5rem] flex-col overflow-hidden rounded-2xl border p-5 shadow-shell transition-shadow",
     href ? "hover:shadow-md" : "",
     variant === "clinical"
       ? "border-clinical-200/80 bg-gradient-to-br from-clinical-50/40 via-white to-white"
@@ -40,14 +40,14 @@ export function KpiStatCard({ label, value, helper, icon: Icon, emphasis, href, 
       <p className="mt-3 text-3xl font-semibold tabular-nums tracking-tight text-ink">{value}</p>
       <p className="mt-2 text-sm leading-relaxed text-ink-muted">{helper}</p>
       {href ? (
-        <span className="mt-3 inline-block text-xs font-semibold text-clinical-700">Προβολή →</span>
+        <span className="mt-auto pt-3 text-xs font-semibold text-clinical-700">Προβολή →</span>
       ) : null}
     </>
   );
 
   if (href) {
     return (
-      <Link href={href} className={`${shell} block text-left outline-none ring-clinical-500 focus-visible:ring-2`}>
+      <Link href={href} className={`${shell} text-left outline-none ring-clinical-500 focus-visible:ring-2`}>
         {inner}
       </Link>
     );
