@@ -103,6 +103,12 @@ export default async function SchedulePage({ searchParams }: SchedulePageProps) 
         actions={
           <div className="flex flex-wrap gap-2">
             <Link
+              href="/schedule/control-center"
+              className="rounded-lg border border-clinical-200 bg-clinical-50 px-4 py-2 text-sm font-semibold text-clinical-900 shadow-sm hover:bg-clinical-100/80"
+            >
+              Κεντρικός Πίνακας
+            </Link>
+            <Link
               href={buildScheduleHref({
                 view: search.view,
                 dateYmd: todayAthensYmd(),
