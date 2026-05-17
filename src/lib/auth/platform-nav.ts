@@ -9,6 +9,7 @@ import {
   FileText,
   Headset,
   Home,
+  Landmark,
   LayoutDashboard,
   ListTodo,
   MessageSquare,
@@ -241,6 +242,15 @@ export const PLATFORM_NAV_GROUPS: PlatformNavGroup[] = [
         helper: "Οφειλές & εισπράξεις",
         icon: Wallet,
         anyOf: ["ORG_OWNER", "ORG_ADMIN", "RECEPTION"],
+      }),
+      item({
+        id: "secretary-finances",
+        href: "/secretary/finances",
+        label: "Οικονομικά",
+        helper: "Financial command center · πρωτότυπο",
+        icon: Landmark,
+        anyOf: ["ORG_OWNER", "ORG_ADMIN", "RECEPTION"],
+        badge: "mvp",
       }),
       item({
         id: "secretary-communications",

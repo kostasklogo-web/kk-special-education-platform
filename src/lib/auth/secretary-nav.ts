@@ -4,6 +4,7 @@ import {
   CalendarDays,
   ClipboardList,
   FileText,
+  Landmark,
   LayoutDashboard,
   ListTodo,
   MessageSquare,
@@ -20,6 +21,7 @@ export type SecretaryRouteId =
   | "new-case"
   | "appointments"
   | "payments"
+  | "finances"
   | "tasks"
   | "communications"
   | "diagnoses"
@@ -90,6 +92,16 @@ export const SECRETARY_NAV_ITEMS: SecretaryNavItem[] = [
     icon: Wallet,
     viewRoles: ["ORG_OWNER", "ORG_ADMIN", "RECEPTION"],
     mutateRoles: ["ORG_OWNER", "ORG_ADMIN", "RECEPTION"],
+    implementation: "live",
+  },
+  {
+    id: "finances",
+    href: "/secretary/finances",
+    label: "Οικονομικά",
+    helper: "Financial command center · πρωτότυπο",
+    icon: Landmark,
+    viewRoles: ["ORG_OWNER", "ORG_ADMIN", "RECEPTION"],
+    mutateRoles: ["ORG_OWNER", "ORG_ADMIN"],
     implementation: "live",
   },
   {
