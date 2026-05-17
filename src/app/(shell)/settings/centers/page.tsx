@@ -14,7 +14,7 @@ import { CentersTable } from "@/components/settings/centers-table";
 export default async function CentersSettingsPage() {
   const ctx = await getSessionContext();
   if (!canAccessSettingsAndCentersModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   const { organizationId, error: orgErr } = await getDefaultOrganizationIdForUser();

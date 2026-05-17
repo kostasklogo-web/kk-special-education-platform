@@ -27,7 +27,7 @@ export default async function TherapyGoalDetailPage({ params }: TherapyGoalDetai
   const { id } = await params;
   const ctx = await getSessionContext();
   if (!canAccessTherapyGoalsModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   const { item, error } = await getTherapyGoalListItemById(id);

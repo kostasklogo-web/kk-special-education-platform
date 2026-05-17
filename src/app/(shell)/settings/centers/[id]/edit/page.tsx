@@ -19,7 +19,7 @@ export default async function EditCenterPage({ params }: EditCenterPageProps) {
   const { id } = await params;
   const ctx = await getSessionContext();
   if (!canAccessSettingsAndCentersModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
   if (!canManageCenters(ctx.roleCodes)) {
     redirect(`/settings/centers/${id}`);

@@ -28,6 +28,9 @@ import type { AppointmentReminderStatus } from "@/lib/secretary/types";
 const ORG = "10000000-0000-4000-8000-000000000001";
 const today = todayAthensYmd();
 
+/** Civil day when demo appointment slots were built (shifted at load for schedule view). */
+export const SECRETARY_DEMO_SCHEDULE_ANCHOR_YMD = today;
+
 function athensSlot(ymd: string, hour: number, minute: number, durationMin: number): {
   startsAt: string;
   endsAt: string;

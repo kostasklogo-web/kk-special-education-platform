@@ -34,7 +34,7 @@ export default async function StaffDetailPage({ params }: StaffDetailPageProps) 
   const { id } = await params;
   const ctx = await getSessionContext();
   if (!canAccessStaffModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   const { item, error } = await getStaffById(id);

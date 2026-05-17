@@ -5,6 +5,7 @@ import { canMutateSecretaryRoute } from "@/lib/auth/secretary-permissions";
 import { requireSecretaryPath } from "@/lib/auth/require-secretary-route";
 import { getDefaultOrganizationIdForUser } from "@/lib/data/children/queries";
 import { getSecretaryDemoBundle } from "@/lib/data/secretary/queries";
+import { loadSecretaryScheduleAppointments } from "@/lib/data/secretary/schedule-load";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { SecretaryScheduleWorkspace } from "@/components/secretary/schedule/SecretaryScheduleWorkspace";
 
@@ -19,7 +20,8 @@ export default async function SecretarySchedulePage() {
 
   const { organizationId } = await getDefaultOrganizationIdForUser();
   const org = organizationId ?? "";
-  const bundle = getSecretaryDemoBundle(org);
+  const schedule = await loadSecretaryScheduleAppointments(org);
+  const bundle = getSecretaryDemoBundle(schedule.organizationId);
 
   return (
     <div>
@@ -38,8 +40,9 @@ export default async function SecretarySchedulePage() {
       />
       <Suspense fallback={<ScheduleFallback />}>
         <SecretaryScheduleWorkspace
-          organizationId={org}
-          initialAppointments={bundle.appointments}
+          organizationId={schedule.organizationId}
+          initialAppointments={schedule.appointments}
+          dataSource={schedule.source}
           payments={bundle.payments}
           diagnoses={bundle.diagnoses}
           tasks={bundle.tasks}

@@ -33,7 +33,7 @@ type AttendancePageProps = {
 export default async function AttendancePage({ searchParams }: AttendancePageProps) {
   const ctx = await getSessionContext();
   if (!canAccessAttendanceModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   const raw = await searchParams;

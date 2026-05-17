@@ -52,7 +52,7 @@ export function LoginForm({ nextPath: _nextPath }: LoginFormProps) {
     }
 
     try {
-      router.push("/dashboard");
+      router.push("/");
       router.refresh();
     } catch {
       setError("Η σύνδεση ολοκληρώθηκε, αλλά η μετάβαση στον πίνακα δεν ήταν δυνατή.");

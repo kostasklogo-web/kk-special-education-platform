@@ -15,7 +15,7 @@ export default async function ReportDetailPage({ params }: ReportDetailPageProps
   const { id } = await params;
   const ctx = await getSessionContext();
   if (!canAccessSessionNotesModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   const { item, error } = await getProgressReportById(id);

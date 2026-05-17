@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { RoleBadge } from "@/components/shell/RoleBadge";
 import type { RoleCode } from "@/lib/auth/roles";
 import { signOut } from "@/lib/auth/actions";
@@ -9,20 +10,23 @@ type AppHeaderProps = {
 
 export function AppHeader({ roleCodes, userEmail }: AppHeaderProps) {
   return (
-    <header className="sticky top-0 z-30 flex min-h-16 items-center justify-between gap-4 border-b border-border bg-surface-card/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-surface-card/80 md:px-8">
-      <div className="min-w-0 flex-1 pl-14 md:pl-0">
-        <p className="truncate text-xs font-medium uppercase tracking-wide text-ink-faint">
-          Ημερήσια λειτουργία κέντρου
-        </p>
+    <header className="sticky top-0 z-30 flex min-h-14 items-center justify-between gap-4 border-b border-border bg-surface-card/95 px-3 backdrop-blur supports-[backdrop-filter]:bg-surface-card/80 md:px-6">
+      <div className="min-w-0 flex-1 pl-12 md:pl-0">
+        <Link href="/" className="block min-w-0 hover:opacity-90">
+          <p className="truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-clinical-700">
+            Λειτουργική πλατφόρμα
+          </p>
+          <p className="truncate text-sm font-medium text-ink">Κεντρικός πίνακας λειτουργίας</p>
+        </Link>
         {userEmail ? (
-          <p className="truncate text-sm text-ink-muted" title={userEmail}>
+          <p className="truncate text-xs text-ink-muted" title={userEmail}>
             {userEmail}
           </p>
         ) : null}
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <div className="hidden items-center gap-2 sm:flex">
-          <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-900">
+          <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-900">
             Dev auth off
           </span>
           <RoleBadge roleCodes={roleCodes} />

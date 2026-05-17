@@ -47,10 +47,12 @@ import { ScheduleToolbar } from "./ScheduleToolbar";
 import { AppointmentFormModal } from "./AppointmentFormModal";
 import { useMeetings } from "@/components/secretary/meetings/MeetingsChargeProvider";
 import { mergeMeetingsIntoAppointments } from "@/lib/secretary/meetings/schedule-sync";
+import type { SecretaryScheduleDataSource } from "@/lib/secretary/schedule-demo";
 
 export type SecretaryScheduleWorkspaceProps = {
   organizationId: string;
   initialAppointments: SecretaryAppointment[];
+  dataSource?: SecretaryScheduleDataSource;
   payments: PaymentObligation[];
   diagnoses: DiagnosisDocument[];
   tasks: SecretaryTask[];
@@ -77,6 +79,7 @@ function filtersFromSearchParams(sp: URLSearchParams): Partial<ScheduleFilterSta
 export function SecretaryScheduleWorkspace({
   organizationId,
   initialAppointments,
+  dataSource = "demo",
   payments: paymentsProp,
   diagnoses: diagnosesProp,
   tasks,
@@ -249,6 +252,15 @@ export function SecretaryScheduleWorkspace({
 
   return (
     <div className="space-y-4">
+      {dataSource === "demo" ? (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950"
+        >
+          Προβολή επίδειξης με ενδεικτικά δεδομένα
+        </div>
+      ) : null}
+
       <ScheduleToolbar
         readOnly={readOnly}
         onQuickCreate={openCreate}

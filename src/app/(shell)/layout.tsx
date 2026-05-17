@@ -1,5 +1,5 @@
 import { AppHeader } from "@/components/shell/AppHeader";
-import { AppSidebar } from "@/components/shell/AppSidebar";
+import { PlatformSidebar } from "@/components/shell/PlatformSidebar";
 import { ShellCommunicationBridge } from "@/components/secretary/reminders/ShellCommunicationBridge";
 import { GdprShellBridge } from "@/components/gdpr/GdprShellBridge";
 import { canAccessSecretaryModule } from "@/lib/auth/secretary-permissions";
@@ -34,10 +34,10 @@ export default async function ShellLayout({
 
   return (
     <div className="flex min-h-screen bg-surface">
-      <AppSidebar roleCodes={ctx.roleCodes} />
+      <PlatformSidebar roleCodes={ctx.roleCodes} />
       <div className="flex min-h-screen flex-1 flex-col md:pl-[var(--shell-sidebar)]">
         <AppHeader roleCodes={ctx.roleCodes} userEmail={ctx.user?.email} />
-        <main className="flex-1 px-4 py-6 md:px-8 md:py-8">
+        <main className="flex-1 px-3 py-4 md:px-6 md:py-6">
           <GdprShellBridge
             organizationId={gdprOrganizationId}
             userId={ctx.user?.id ?? null}

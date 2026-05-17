@@ -18,7 +18,7 @@ export default async function EditAttendancePage({ params }: EditAttendancePageP
   const { sessionId } = await params;
   const ctx = await getSessionContext();
   if (!canAccessAttendanceModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   const { detail, error } = await getAttendanceDetail(sessionId);

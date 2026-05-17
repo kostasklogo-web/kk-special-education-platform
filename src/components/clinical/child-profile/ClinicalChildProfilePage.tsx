@@ -1,3 +1,4 @@
+import { TrackRecentChildVisit } from "@/components/platform/TrackRecentChildVisit";
 import { ClinicalChildProfileShell } from "./ClinicalChildProfileShell";
 import { canMutateChildren } from "@/lib/auth/children-permissions";
 import { canMutateSchedule } from "@/lib/auth/schedule-permissions";
@@ -35,8 +36,13 @@ export async function ClinicalChildProfilePage({ childId }: Props) {
     ...(source === "database" ? [] : []),
   ];
 
+  const childLabel =
+    [bundle.child.first_name, bundle.child.last_name].filter(Boolean).join(" ").trim() || "Φάκελος παιδιού";
+
   return (
-    <ClinicalChildProfileShell
+    <>
+      <TrackRecentChildVisit childId={childId} label={childLabel} />
+      <ClinicalChildProfileShell
       bundle={bundle}
       roleCodes={ctx.roleCodes}
       canMutate={canMutate}
@@ -47,5 +53,6 @@ export async function ClinicalChildProfilePage({ childId }: Props) {
       isPrototype={isPrototype}
       dataSource={source}
     />
+    </>
   );
 }

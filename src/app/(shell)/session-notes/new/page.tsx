@@ -15,7 +15,7 @@ import { createSessionNoteAction } from "@/app/(shell)/session-notes/actions";
 export default async function NewSessionNotePage() {
   const ctx = await getSessionContext();
   if (!canAccessSessionNotesModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
   if (!canWriteSessionNotes(ctx.roleCodes)) {
     redirect("/session-notes");

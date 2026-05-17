@@ -9,7 +9,7 @@ export default async function SessionNotesModuleLayout({
 }>) {
   const ctx = await getSessionContext();
   if (isParentOnly(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
   return <>{children}</>;
 }

@@ -37,7 +37,7 @@ type SessionNotesPageProps = {
 export default async function SessionNotesPage({ searchParams }: SessionNotesPageProps) {
   const ctx = await getSessionContext();
   if (!canAccessSessionNotesModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   const raw = await searchParams;

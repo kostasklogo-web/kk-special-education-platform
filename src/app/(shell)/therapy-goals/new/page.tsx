@@ -29,7 +29,7 @@ function firstString(v: string | string[] | undefined): string | undefined {
 export default async function NewTherapyGoalPage({ searchParams }: NewTherapyGoalPageProps) {
   const ctx = await getSessionContext();
   if (!canAccessTherapyGoalsModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
   if (!canWriteTherapyGoals(ctx.roleCodes)) {
     redirect("/therapy-goals");

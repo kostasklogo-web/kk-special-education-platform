@@ -21,6 +21,7 @@ const dayYmd = todayAthensYmd();
 type QuickAction = { href: string; label: string; icon: LucideIcon };
 
 const OPERATIONS_ACTIONS: QuickAction[] = [
+  { href: "/schedule/control-center", label: "Πίνακας προγράμματος", icon: LayoutGrid },
   { href: buildScheduleHref({ view: "day", dateYmd: dayYmd, filters: {} }), label: "Πρόγραμμα σήμερα", icon: CalendarDays },
   { href: "/schedule/new", label: "Νέα συνεδρία", icon: CalendarPlus },
   { href: "/attendance", label: "Παρουσίες", icon: ClipboardCheck },

@@ -31,7 +31,7 @@ type SchedulePageProps = {
 export default async function SchedulePage({ searchParams }: SchedulePageProps) {
   const ctx = await getSessionContext();
   if (!canAccessScheduleModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   const raw = await searchParams;

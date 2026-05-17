@@ -16,7 +16,7 @@ import { createStaffAction } from "@/app/(shell)/staff/actions";
 export default async function NewStaffPage() {
   const ctx = await getSessionContext();
   if (!canAccessStaffModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
   if (!canWriteStaffRecord(ctx.roleCodes)) {
     redirect("/staff");

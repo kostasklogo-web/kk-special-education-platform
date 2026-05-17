@@ -21,7 +21,7 @@ export default async function EditStaffPage({ params }: EditStaffPageProps) {
   const { id } = await params;
   const ctx = await getSessionContext();
   if (!canAccessStaffModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
   if (!canWriteStaffRecord(ctx.roleCodes)) {
     redirect(`/staff/${id}`);

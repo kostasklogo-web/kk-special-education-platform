@@ -23,7 +23,7 @@ export type NavItem = {
 };
 
 export const MAIN_NAV: NavItem[] = [
-  { href: "/dashboard", label: "Αρχική", icon: Home },
+  { href: "/", label: "Αρχική", icon: Home },
   {
     href: "/children",
     label: "Παιδιά",

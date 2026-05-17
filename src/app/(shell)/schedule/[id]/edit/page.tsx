@@ -25,7 +25,7 @@ export default async function EditSessionPage({ params }: EditSessionPageProps) 
   const { id } = await params;
   const ctx = await getSessionContext();
   if (!canAccessScheduleModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   const { session, error } = await getSessionById(id);

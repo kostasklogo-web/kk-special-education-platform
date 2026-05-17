@@ -22,7 +22,7 @@ type StaffPageProps = {
 export default async function StaffPage({ searchParams }: StaffPageProps) {
   const ctx = await getSessionContext();
   if (!canAccessStaffModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   const raw = await searchParams;

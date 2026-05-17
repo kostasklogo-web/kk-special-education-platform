@@ -9,7 +9,7 @@ export default async function SettingsModuleLayout({
 }>) {
   const ctx = await getSessionContext();
   if (!canAccessSettingsAndCentersModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
   return <>{children}</>;
 }

@@ -33,7 +33,7 @@ export default async function CenterDetailPage({ params }: CenterDetailPageProps
   const { id } = await params;
   const ctx = await getSessionContext();
   if (!canAccessSettingsAndCentersModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   const { center, error } = await getCenterById(id);

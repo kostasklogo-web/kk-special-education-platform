@@ -30,7 +30,7 @@ export default async function RoomDetailPage({ params }: RoomDetailPageProps) {
   const { id } = await params;
   const ctx = await getSessionContext();
   if (!canAccessRoomsModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   const { room, error } = await getRoomById(id);

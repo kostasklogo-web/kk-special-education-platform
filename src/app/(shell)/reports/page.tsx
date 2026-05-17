@@ -19,7 +19,7 @@ type ReportsPageProps = {
 export default async function ReportsPage({ searchParams }: ReportsPageProps) {
   const ctx = await getSessionContext();
   if (!canAccessSessionNotesModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   const raw = await searchParams;
@@ -64,7 +64,7 @@ export default async function ReportsPage({ searchParams }: ReportsPageProps) {
         description="Λίστα αναφορών ανά παιδί και κατάσταση. Η γραμματεία παρακολουθεί την ουρά εκκρεμοτήτων πριν την κοινοποίηση· οι επόπτες ελέγχουν περιεχόμενο και μορφή."
         actions={
           <Link
-            href="/dashboard"
+            href="/"
             className="rounded-lg border border-border bg-white px-4 py-2 text-sm font-medium text-ink shadow-sm hover:bg-surface-muted"
           >
             Πίνακας

@@ -20,7 +20,7 @@ type ParentsPageProps = {
 export default async function ParentsPage({ searchParams }: ParentsPageProps) {
   const ctx = await getSessionContext();
   if (!canAccessParentsModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   const { q } = await searchParams;

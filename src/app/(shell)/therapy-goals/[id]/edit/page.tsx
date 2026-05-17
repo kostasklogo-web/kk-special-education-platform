@@ -24,7 +24,7 @@ export default async function EditTherapyGoalPage({ params }: EditTherapyGoalPag
   const { id } = await params;
   const ctx = await getSessionContext();
   if (!canAccessTherapyGoalsModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
   if (!canWriteTherapyGoals(ctx.roleCodes)) {
     redirect(`/therapy-goals/${id}`);

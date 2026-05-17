@@ -13,7 +13,7 @@ import { createCenterAction } from "@/app/(shell)/settings/centers/actions";
 export default async function NewCenterPage() {
   const ctx = await getSessionContext();
   if (!canAccessSettingsAndCentersModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
   if (!canManageCenters(ctx.roleCodes)) {
     redirect("/settings/centers");

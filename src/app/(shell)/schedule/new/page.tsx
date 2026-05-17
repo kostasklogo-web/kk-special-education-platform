@@ -23,7 +23,7 @@ type NewSessionPageProps = {
 export default async function NewSessionPage({ searchParams }: NewSessionPageProps) {
   const ctx = await getSessionContext();
   if (!canAccessScheduleModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
   if (!canMutateSchedule(ctx.roleCodes)) {
     redirect("/schedule");

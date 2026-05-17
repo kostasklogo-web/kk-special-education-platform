@@ -16,7 +16,7 @@ export default async function EditRoomPage({ params }: EditRoomPageProps) {
   const { id } = await params;
   const ctx = await getSessionContext();
   if (!canAccessRoomsModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
   if (!canWriteRooms(ctx.roleCodes)) {
     redirect(`/rooms/${id}`);

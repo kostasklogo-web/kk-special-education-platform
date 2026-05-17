@@ -28,7 +28,7 @@ export default async function SessionNoteDetailPage({ params }: SessionNoteDetai
   const { id } = await params;
   const ctx = await getSessionContext();
   if (!canAccessSessionNotesModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   const { note, session, author_display_name, error } = await getSessionNoteById(id);

@@ -10,7 +10,7 @@ import { createRoomAction } from "@/app/(shell)/rooms/actions";
 export default async function NewRoomPage() {
   const ctx = await getSessionContext();
   if (!canAccessRoomsModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
   if (!canWriteRooms(ctx.roleCodes)) {
     redirect("/rooms");

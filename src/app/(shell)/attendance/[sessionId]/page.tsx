@@ -19,7 +19,7 @@ export default async function AttendanceDetailPage({ params }: AttendanceDetailP
   const { sessionId } = await params;
   const ctx = await getSessionContext();
   if (!canAccessAttendanceModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   const { detail, error } = await getAttendanceDetail(sessionId);

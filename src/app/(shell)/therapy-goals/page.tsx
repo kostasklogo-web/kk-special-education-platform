@@ -28,7 +28,7 @@ type TherapyGoalsPageProps = {
 export default async function TherapyGoalsPage({ searchParams }: TherapyGoalsPageProps) {
   const ctx = await getSessionContext();
   if (!canAccessTherapyGoalsModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   const raw = await searchParams;

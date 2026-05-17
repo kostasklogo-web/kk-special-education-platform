@@ -18,7 +18,7 @@ type RoomsPageProps = {
 export default async function RoomsPage({ searchParams }: RoomsPageProps) {
   const ctx = await getSessionContext();
   if (!canAccessRoomsModule(ctx.roleCodes)) {
-    redirect("/dashboard");
+    redirect("/");
   }
 
   const raw = await searchParams;
