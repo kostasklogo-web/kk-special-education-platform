@@ -16,7 +16,7 @@ import { InspectorPanel } from "./InspectorPanel";
 import { ReceptionActions } from "./ReceptionActions";
 import { RoomAvailabilityPanel } from "./RoomAvailabilityPanel";
 
-export const CC_RIGHT_SIDEBAR_W = 268;
+export const CC_RIGHT_SIDEBAR_W = 252;
 
 type RightSidebarProps = {
   selected: ControlBoardBlock | null;
@@ -71,7 +71,7 @@ export const RightSidebar = memo(function RightSidebar({
 }: RightSidebarProps) {
   return (
     <aside
-      className="flex h-full w-[268px] min-w-[268px] max-w-[268px] shrink-0 flex-col gap-1.5 overflow-y-auto overflow-x-hidden border-l border-slate-200 bg-slate-50/60 py-1 pl-2 pr-1"
+      className="flex h-full w-[252px] min-w-[252px] max-w-[252px] shrink-0 flex-col gap-1 overflow-y-auto overflow-x-hidden border-l border-slate-200 bg-slate-50/60 py-0.5 pl-1.5 pr-1"
       aria-label="Εργαλεία λειτουργίας"
     >
       <SidebarSection title="Επιθεωρητής">
@@ -91,8 +91,16 @@ export const RightSidebar = memo(function RightSidebar({
       </SidebarSection>
 
       <SidebarSection title="Διαθεσιμότητα" id="cc-availability-panel">
-        <div className="mb-1.5 flex flex-wrap gap-1">
-          {LEGEND_CODES.map((code) => {
+        <div className="mb-1 flex flex-wrap gap-1">
+          <span className="inline-flex items-center gap-0.5 text-[9px] text-ink-muted">
+            <span className="h-2 w-2 rounded border border-slate-600 bg-[repeating-linear-gradient(-45deg,#e2e8f0,#e2e8f0_3px,#94a3b8_3px,#94a3b8_6px)]" />
+            Διάλ. 15′
+          </span>
+          <span className="inline-flex items-center gap-0.5 text-[9px] text-ink-muted">
+            <span className="h-2 w-2 rounded border border-amber-600 bg-amber-100" />
+            Διάλ. 10′
+          </span>
+          {LEGEND_CODES.filter((c) => c !== "brk").map((code) => {
             const vis = disciplineVisual({
               id: "lg",
               source: "demo",
@@ -130,6 +138,7 @@ export const RightSidebar = memo(function RightSidebar({
           onTherapistFilter={onTherapistFilter}
           onDurationNeed={onDurationNeed}
           dateYmd={dateYmd}
+          embedded
         />
       </SidebarSection>
 
@@ -149,8 +158,8 @@ export const RightSidebar = memo(function RightSidebar({
 
 function SidebarSection({ title, id, children }: { title: string; id?: string; children: ReactNode }) {
   return (
-    <section id={id} className="shrink-0 rounded-md border border-border/80 bg-white p-2 shadow-sm">
-      <h2 className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-ink-faint">{title}</h2>
+    <section id={id} className="shrink-0 rounded border border-border/80 bg-white p-1.5 shadow-sm">
+      <h2 className="mb-1 text-[9px] font-bold uppercase tracking-wide text-ink-faint">{title}</h2>
       {children}
     </section>
   );

@@ -30,6 +30,7 @@ type AvailabilityPanelProps = {
   onTherapistFilter: (v: string) => void;
   onDurationNeed: (v: 45 | 50 | 90) => void;
   dateYmd: string;
+  embedded?: boolean;
 };
 
 export const AvailabilityPanel = memo(function AvailabilityPanel({
@@ -45,49 +46,47 @@ export const AvailabilityPanel = memo(function AvailabilityPanel({
   onTherapistFilter,
   onDurationNeed,
   dateYmd,
+  embedded = false,
 }: AvailabilityPanelProps) {
+  const wrap = embedded ? "" : "rounded-lg border border-border bg-surface-card p-3 shadow-sm";
+
   return (
-    <>
-      <section className="rounded-lg border border-border bg-surface-card p-3 shadow-sm">
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <p className="text-sm font-bold text-ink">Διαθεσιμότητα ανά ειδικότητα</p>
-          <span className="text-[10px] text-ink-faint">Επόμενο κενό ≥45′ / ≥90′ (επιλεγμένη ημέρα)</span>
-        </div>
+  <>
+      <div className={embedded ? "space-y-2" : wrap}>
+        <p className={embedded ? "text-[10px] font-bold text-ink" : "text-sm font-bold text-ink"}>
+          Ειδικότητες — επόμενο κενό
+        </p>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[520px] border-collapse text-left text-sm">
+          <table className="w-full border-collapse text-left text-[10px]">
             <thead>
-              <tr className="border-b border-border text-[11px] uppercase tracking-wide text-ink-faint">
-                <th className="py-1.5 pr-2">Ειδικότητα</th>
-                <th className="py-1.5 pr-2">Θεραπευτές</th>
-                <th className="py-1.5 pr-2">Επόμενο 45′</th>
-                <th className="py-1.5 pr-2">Επόμενο 90′</th>
+              <tr className="border-b border-border text-[9px] uppercase tracking-wide text-ink-faint">
+                <th className="py-1 pr-1">Ειδ.</th>
+                <th className="py-1 pr-1">45′</th>
+                <th className="py-1 pr-1">90′</th>
               </tr>
             </thead>
             <tbody>
               {specialtyRows.map((row) => (
-                <tr key={row.code} className="border-b border-border/70">
-                  <td className="py-1.5 pr-2 font-medium text-ink">{row.name}</td>
-                  <td className="max-w-[12rem] py-1.5 pr-2 text-xs text-ink-muted">{row.therapists}</td>
-                  <td className="py-1.5 pr-2 tabular-nums text-ink">{row.next45El}</td>
-                  <td className="py-1.5 pr-2 tabular-nums text-ink">{row.next90El}</td>
+                <tr key={row.code} className="border-b border-border/60">
+                  <td className="max-w-[5.5rem] truncate py-0.5 pr-1 font-medium text-ink" title={row.name}>
+                    {row.name}
+                  </td>
+                  <td className="py-0.5 pr-1 tabular-nums text-emerald-900">{row.next45El}</td>
+                  <td className="py-0.5 pr-1 tabular-nums text-indigo-900">{row.next90El}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-      </section>
+      </div>
 
-      <section
-        id="availability-panel"
-        className="rounded-lg border border-clinical-300/70 bg-gradient-to-br from-clinical-50/50 to-white p-3 shadow-sm"
-      >
-        <p className="text-base font-bold text-clinical-950">Πίνακας διαθεσιμότητας</p>
-        <p className="mt-0.5 text-[11px] font-semibold uppercase tracking-wide text-clinical-800/90">Γραμματεία · επιλεγμένη ημέρα</p>
-        <div className="mt-2 grid gap-2 sm:grid-cols-3">
-          <label className="block text-xs text-ink-muted">
+      <div className={embedded ? "space-y-1.5 border-t border-border/60 pt-1.5" : "mt-3 rounded-lg border border-clinical-300/70 bg-gradient-to-br from-clinical-50/50 to-white p-3 shadow-sm"}>
+        <p className="text-[10px] font-bold text-clinical-950">Φίλτρα προτάσεων</p>
+        <div className="grid gap-1.5">
+          <label className="block text-[10px] text-ink-muted">
             Ειδικότητα
             <select
-              className="mt-1 w-full rounded-lg border border-border bg-white px-2 py-2 text-sm"
+              className="mt-0.5 w-full rounded border border-border bg-white px-1.5 py-1 text-[11px]"
               value={freeSpecialtyFilter}
               onChange={(e) => onSpecialtyFilter(e.target.value)}
             >
@@ -101,10 +100,10 @@ export const AvailabilityPanel = memo(function AvailabilityPanel({
                 ))}
             </select>
           </label>
-          <label className="block text-xs text-ink-muted">
+          <label className="block text-[10px] text-ink-muted">
             Θεραπευτής
             <select
-              className="mt-1 w-full rounded-lg border border-border bg-white px-2 py-2 text-sm"
+              className="mt-0.5 w-full rounded border border-border bg-white px-1.5 py-1 text-[11px]"
               value={freeTherapistFilter}
               onChange={(e) => onTherapistFilter(e.target.value)}
             >
@@ -116,10 +115,10 @@ export const AvailabilityPanel = memo(function AvailabilityPanel({
               ))}
             </select>
           </label>
-          <label className="block text-xs text-ink-muted">
+          <label className="block text-[10px] text-ink-muted">
             Διάρκεια
             <select
-              className="mt-1 w-full rounded-lg border border-border bg-white px-2 py-2 text-sm"
+              className="mt-0.5 w-full rounded border border-border bg-white px-1.5 py-1 text-[11px]"
               value={freeDurationNeedValue}
               onChange={(e) => onDurationNeed(Number(e.target.value) as 45 | 50 | 90)}
             >
@@ -129,58 +128,41 @@ export const AvailabilityPanel = memo(function AvailabilityPanel({
             </select>
           </label>
         </div>
-      </section>
+      </div>
 
       <section
         id="suggested-slots-panel"
-        className="rounded-lg border border-clinical-200/90 bg-gradient-to-br from-clinical-50/40 to-white p-3 shadow-sm"
+        className={embedded ? "space-y-1.5 border-t border-border/60 pt-1.5" : "rounded-lg border border-clinical-200/90 bg-gradient-to-br from-clinical-50/40 to-white p-3 shadow-sm"}
       >
-        <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex items-center justify-between gap-1">
           <div>
-            <p className="text-sm font-bold text-clinical-950">Προτεινόμενες διαθέσιμες ώρες</p>
-            <p className="mt-1 text-sm text-ink-muted">
-              {suggestedSlots.length} πρόταση/ες · διάρκεια {freeDurationNeed}′ · {formatAthensLongDateFromYmd(dateYmd)}
+            <p className="text-[10px] font-bold text-clinical-950">Προτεινόμενες ώρες</p>
+            <p className="text-[9px] text-ink-muted">
+              {suggestedSlots.length} · {freeDurationNeed}′ · {formatAthensLongDateFromYmd(dateYmd)}
             </p>
           </div>
-          <span className="inline-flex items-center gap-1 rounded-full border border-clinical-200 bg-white px-3 py-1 text-xs font-medium text-clinical-900">
-            <Sparkles className="h-3.5 w-3.5" aria-hidden />
-            Επίδειξη
+          <span className="inline-flex items-center gap-0.5 rounded-full border border-clinical-200 bg-white px-1.5 py-0.5 text-[9px] font-medium text-clinical-900">
+            <Sparkles className="h-3 w-3" aria-hidden />
+            Demo
           </span>
         </div>
-        {suggestedSlots.length === 0 ? (
-          <p className="mt-3 text-sm text-ink-muted">Δεν βρέθηκαν προτεινόμενα κενά με τα τρέχοντα φίλτρα.</p>
-        ) : (
-          <div className="mt-3 overflow-x-auto">
-            <table className="w-full min-w-[640px] border-collapse text-left text-sm">
-              <thead>
-                <tr className="border-b border-border text-[10px] uppercase tracking-wide text-ink-faint">
-                  <th className="py-1.5 pr-2">Θεραπευτής</th>
-                  <th className="py-1.5 pr-2">Ειδικότητα</th>
-                  <th className="py-1.5 pr-2">Ώρα</th>
-                  <th className="py-1.5 pr-2">Αίθουσα</th>
-                  <th className="py-1.5 pr-2">Καταλληλότητα</th>
-                </tr>
-              </thead>
-              <tbody>
-                {suggestedSlots.map((s, i) => (
-                  <tr key={`${s.therapistUserId}-${s.startMs}-${i}`} className="border-b border-border/60">
-                    <td className="py-1.5 pr-2 font-medium text-ink">{s.therapistName}</td>
-                    <td className="py-1.5 pr-2 text-ink-muted">{s.specialtyNameEl}</td>
-                    <td className="py-1.5 pr-2 tabular-nums font-semibold text-clinical-900">
-                      {formatAthensHmFromUtcMs(s.startMs)}–{formatAthensHmFromUtcMs(s.endMs)}
-                    </td>
-                    <td className="py-1.5 pr-2 text-ink">{s.roomAvailabilityEl}</td>
-                    <td className="py-1.5 pr-2">
-                      <span className="inline-block rounded-md bg-clinical-100 px-2 py-0.5 text-[11px] font-medium text-clinical-950">
-                        {s.suitabilityEl}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <ul className="mt-1 max-h-48 space-y-1 overflow-y-auto">
+          {suggestedSlots.map((s, i) => (
+            <li
+              key={`${s.therapistUserId}-${s.startMs}-${i}`}
+              className="rounded border border-clinical-200/80 bg-white px-1.5 py-1 text-[10px] leading-snug"
+            >
+              <p className="font-bold tabular-nums text-clinical-950">
+                {formatAthensHmFromUtcMs(s.startMs)}–{formatAthensHmFromUtcMs(s.endMs)}
+              </p>
+              <p className="truncate font-medium text-ink">{s.therapistName}</p>
+              <p className="text-ink-muted">
+                {s.specialtyNameEl} · <span className="font-semibold text-ink">{s.roomAvailabilityEl}</span>
+              </p>
+              <p className="text-[9px] text-clinical-800">{s.suitabilityEl}</p>
+            </li>
+          ))}
+        </ul>
       </section>
     </>
   );

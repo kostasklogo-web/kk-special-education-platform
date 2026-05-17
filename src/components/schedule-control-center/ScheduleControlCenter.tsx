@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { addDaysAthensCalendar } from "@/lib/schedule/athens-civil";
 import {
@@ -20,11 +20,13 @@ import {
   CONTROL_CENTER_DEMO_THERAPIST_PRIMARY_CODE,
   CONTROL_CENTER_DEMO_THERAPISTS,
   CONTROL_CENTER_SIDE50_THERAPIST_IDS,
-  controlCenterTherapistColumnTier,
   indexControlCenterBlocksByTherapist,
-  isControlCenterSide50Therapist,
-  shiftControlCenterDemoBlocksToYmd,
 } from "@/lib/demo/schedule-control-center-data";
+import {
+  getControlCenterBlocksForColumnWidth,
+  getControlCenterDemoBlocksForDate,
+  getControlCenterTherapistColumnDefs,
+} from "@/lib/schedule/control-center-demo";
 import {
   computeFreeGapsWithinWindow,
   computeSuggestedSlots,
@@ -43,7 +45,7 @@ import {
 import { StickyHeader } from "@/components/schedule-control-center/StickyHeader";
 import type { TherapistColumnDef } from "@/components/schedule-control-center/types";
 
-type Props = { dateYmd: string };
+type Props = { dateYmd: string; initialDemoBlocks?: ControlBoardBlock[] };
 
 function buildControlCenterHref(dateYmd: string): string {
   return `/schedule/control-center?date=${encodeURIComponent(dateYmd)}`;
@@ -99,14 +101,6 @@ function ScheduleBoard({
 }) {
   const { fitsWithoutHorizontalScroll } = useScheduleScale();
 
-  if (side50Columns.length === 0 && main45Columns.length === 0) {
-    return (
-      <div className="flex items-center justify-center p-4 text-xs text-ink-muted">
-        Δεν υπάρχουν στήλες με τα τρέχοντα φίλτρα.
-      </div>
-    );
-  }
-
   const boardW = fitsWithoutHorizontalScroll ? "w-full" : "min-w-max";
 
   return (
@@ -128,8 +122,17 @@ function ScheduleBoard({
   );
 }
 
-export function ScheduleControlCenter({ dateYmd }: Props) {
-  const initialBlocks = useMemo(() => shiftControlCenterDemoBlocksToYmd(dateYmd), [dateYmd]);
+const STABLE_COLUMN_WIDTH_BLOCKS = getControlCenterBlocksForColumnWidth();
+const STABLE_THERAPIST_COLUMNS = getControlCenterTherapistColumnDefs();
+const STABLE_THERAPIST_DISPLAY_NAMES = [...STABLE_THERAPIST_COLUMNS.side50, ...STABLE_THERAPIST_COLUMNS.main45].map(
+  (c) => c.displayName
+);
+
+export function ScheduleControlCenter({ dateYmd, initialDemoBlocks }: Props) {
+  const initialBlocks = useMemo(
+    () => initialDemoBlocks ?? getControlCenterDemoBlocksForDate(dateYmd),
+    [dateYmd, initialDemoBlocks]
+  );
   const win = useMemo(() => athensOperationalWindowMs(dateYmd), [dateYmd]);
 
   const [centerId, setCenterId] = useState("");
@@ -165,12 +168,14 @@ export function ScheduleControlCenter({ dateYmd }: Props) {
 
   const orderedTherapists = useMemo(
     () =>
-      [...CONTROL_CENTER_DEMO_THERAPISTS].sort((a, b) => {
-        const t = controlCenterTherapistColumnTier(a.user_id) - controlCenterTherapistColumnTier(b.user_id);
-        return t !== 0 ? t : a.display_name.localeCompare(b.display_name, "el");
-      }),
+      [...CONTROL_CENTER_DEMO_THERAPISTS].sort((a, b) =>
+        a.display_name.localeCompare(b.display_name, "el")
+      ),
     []
   );
+
+  const side50Columns: TherapistColumnDef[] = STABLE_THERAPIST_COLUMNS.side50;
+  const main45Columns: TherapistColumnDef[] = STABLE_THERAPIST_COLUMNS.main45;
 
   const filtered = useMemo(() => {
     return initialBlocks.filter((b) => {
@@ -200,25 +205,16 @@ export function ScheduleControlCenter({ dateYmd }: Props) {
     return filtered.filter((b) => (b.centerId ? b.centerId === centerId : b.centerLabel === c.name));
   }, [filtered, centerId]);
 
-  const blocksByTherapist = useMemo(() => indexControlCenterBlocksByTherapist(filtered), [filtered]);
+  const deferredBlocksForSidebar = useDeferredValue(blocksForAvailability);
 
-  const side50Columns: TherapistColumnDef[] = useMemo(() => {
-    const base = orderedTherapists
-      .filter((t) => isControlCenterSide50Therapist(t.user_id))
-      .map((t) => ({ userId: t.user_id, displayName: t.display_name }));
-    return therapistId ? base.filter((c) => c.userId === therapistId) : base;
-  }, [orderedTherapists, therapistId]);
+  /** Πλήρες στατικό demo στον πίνακα — τα φίλτρα επηρεάζουν μόνο την πλαϊνή μπάρα. */
+  const boardBlocks = initialBlocks;
 
-  const main45Columns: TherapistColumnDef[] = useMemo(() => {
-    const base = orderedTherapists
-      .filter((t) => !isControlCenterSide50Therapist(t.user_id))
-      .map((t) => ({ userId: t.user_id, displayName: t.display_name }));
-    return therapistId ? base.filter((c) => c.userId === therapistId) : base;
-  }, [orderedTherapists, therapistId]);
+  const blocksByTherapist = useMemo(() => indexControlCenterBlocksByTherapist(boardBlocks), [boardBlocks]);
 
   const conflictMap = useMemo(
-    () => annotateConflicts(filtered, dateYmd, { exemptStructuredBreakTherapistIds: CONTROL_CENTER_SIDE50_THERAPIST_IDS }),
-    [filtered, dateYmd]
+    () => annotateConflicts(boardBlocks, dateYmd, { exemptStructuredBreakTherapistIds: CONTROL_CENTER_SIDE50_THERAPIST_IDS }),
+    [boardBlocks, dateYmd]
   );
 
   const specialtyNameElByCode = useMemo(
@@ -233,7 +229,7 @@ export function ScheduleControlCenter({ dateYmd }: Props) {
 
   const roomConflicts = useMemo(() => {
     const byRoom = new Map<string, { iv: { startMs: number; endMs: number } }[]>();
-    for (const b of blocksForAvailability) {
+    for (const b of deferredBlocksForSidebar) {
       const rid = b.roomId ?? "";
       if (!rid) continue;
       const iv = blockIntervalInWindowMs(b, dateYmd);
@@ -253,7 +249,7 @@ export function ScheduleControlCenter({ dateYmd }: Props) {
       }
     }
     return conflictRooms;
-  }, [blocksForAvailability, dateYmd]);
+  }, [deferredBlocksForSidebar, dateYmd]);
 
   const specialtyRows: SpecialtyAvailabilityRow[] = useMemo(() => {
     return CONTROL_CENTER_DEMO_DISCIPLINES.filter((d) => d.code !== "brk").map((d) => {
@@ -263,7 +259,7 @@ export function ScheduleControlCenter({ dateYmd }: Props) {
       let next45Ms: number | null = null;
       let next90Ms: number | null = null;
       for (const tid of tids) {
-        const busy = therapistBusyIntervals(tid, blocksForAvailability, dateYmd, true);
+        const busy = therapistBusyIntervals(tid, deferredBlocksForSidebar, dateYmd, true);
         const e45 = computeFreeGapsWithinWindow(win, busy, 45)[0];
         const e90 = computeFreeGapsWithinWindow(win, busy, 90)[0];
         if (e45 && (!next45Ms || e45.startMs < next45Ms)) next45Ms = e45.startMs;
@@ -278,7 +274,7 @@ export function ScheduleControlCenter({ dateYmd }: Props) {
         next90El: next90Ms != null ? formatAthensHmFromUtcMs(next90Ms) : "—",
       };
     });
-  }, [blocksForAvailability, dateYmd, win]);
+  }, [deferredBlocksForSidebar, dateYmd, win]);
 
   const suggestedSlots = useMemo(() => {
     const discTids =
@@ -289,7 +285,7 @@ export function ScheduleControlCenter({ dateYmd }: Props) {
         : null;
     const therapistAllow = freeTherapistFilter ? [freeTherapistFilter] : therapistId ? [therapistId] : null;
     return computeSuggestedSlots({
-      blocks: blocksForAvailability,
+      blocks: deferredBlocksForSidebar,
       dateYmd,
       win,
       durationMin: freeDurationNeed,
@@ -302,7 +298,7 @@ export function ScheduleControlCenter({ dateYmd }: Props) {
       maxResults: 8,
     }).filter((s) => (s.startMs - win.startMs) / 60_000 >= freeAfterMinuteFrom13);
   }, [
-    blocksForAvailability,
+    deferredBlocksForSidebar,
     dateYmd,
     win,
     freeDurationNeed,
@@ -317,10 +313,10 @@ export function ScheduleControlCenter({ dateYmd }: Props) {
   const freeOverlaysByTherapist = useMemo(() => {
     const map = new Map<string, { startMs: number; endMs: number }[]>();
     if (!showFreeSlots) return map;
-    const visibleIds = [...side50Columns, ...main45Columns].map((c) => c.userId);
-    for (const tid of visibleIds) {
+    const allTherapistIds = [...side50Columns, ...main45Columns].map((c) => c.userId);
+    for (const tid of allTherapistIds) {
       if (freeSpecialtyFilter && CONTROL_CENTER_DEMO_THERAPIST_PRIMARY_CODE[tid] !== freeSpecialtyFilter) continue;
-      const busy = therapistBusyIntervals(tid, blocksForAvailability, dateYmd, false);
+      const busy = therapistBusyIntervals(tid, deferredBlocksForSidebar, dateYmd, false);
       const gaps = computeFreeGapsWithinWindow(win, busy, freeDurationNeed).filter(
         (g) => (g.startMs - win.startMs) / 60_000 >= freeAfterMinuteFrom13 && g.minutes >= freeDurationNeed
       );
@@ -331,7 +327,7 @@ export function ScheduleControlCenter({ dateYmd }: Props) {
     showFreeSlots,
     side50Columns,
     main45Columns,
-    blocksForAvailability,
+    deferredBlocksForSidebar,
     dateYmd,
     win,
     freeDurationNeed,
@@ -339,10 +335,10 @@ export function ScheduleControlCenter({ dateYmd }: Props) {
     freeAfterMinuteFrom13,
   ]);
 
-  const selected = selectedId ? (filtered.find((b) => b.id === selectedId) ?? null) : null;
+  const selected = selectedId ? (boardBlocks.find((b) => b.id === selectedId) ?? null) : null;
   const conflictBlockCount = useMemo(
-    () => filtered.filter((b) => (conflictMap.get(b.id)?.length ?? 0) > 0).length,
-    [filtered, conflictMap]
+    () => boardBlocks.filter((b) => (conflictMap.get(b.id)?.length ?? 0) > 0).length,
+    [boardBlocks, conflictMap]
   );
   const handleSelect = useCallback((id: string) => setSelectedId(id), []);
 
@@ -363,31 +359,26 @@ export function ScheduleControlCenter({ dateYmd }: Props) {
   const boardRef = useRef<HTMLDivElement>(null);
   const gridSlotRef = useRef<HTMLDivElement>(null);
 
-  const therapistDisplayNames = useMemo(
-    () => [...side50Columns, ...main45Columns].map((c) => c.displayName),
-    [side50Columns, main45Columns]
-  );
-
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-1">
+    <div className="flex min-h-0 flex-1 flex-col gap-0.5">
       <div className="flex shrink-0 flex-wrap items-center gap-2">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1">
-          <p className="text-sm font-semibold capitalize text-clinical-950">{formatAthensWeekdayLongFromYmd(dateYmd)}</p>
-          <p className="text-[11px] tabular-nums text-ink-muted">{formatAthensFullDateFromYmd(dateYmd)} · 13:00–21:00</p>
-          <span className="hidden text-[10px] text-amber-900/90 sm:inline">Πρωτότυπο read-only</span>
+          <p className="text-xs font-semibold capitalize text-clinical-950">{formatAthensWeekdayLongFromYmd(dateYmd)}</p>
+          <p className="text-[10px] tabular-nums text-ink-muted">{formatAthensFullDateFromYmd(dateYmd)} · 13:00–21:00</p>
+          <span className="text-[9px] text-amber-900/90">Πρωτότυπο read-only</span>
         </div>
         <div className="flex items-center gap-0.5 rounded-md border border-border bg-white px-0.5">
-          <Link href={buildControlCenterHref(prevYmd)} className="inline-flex h-7 w-7 items-center justify-center rounded text-ink-muted hover:bg-surface-muted" aria-label="Προηγούμενη ημέρα">
-            <ChevronLeft className="h-3.5 w-3.5" />
+          <Link href={buildControlCenterHref(prevYmd)} className="inline-flex h-6 w-6 items-center justify-center rounded text-ink-muted hover:bg-surface-muted" aria-label="Προηγούμενη ημέρα">
+            <ChevronLeft className="h-3 w-3" />
           </Link>
-          <Link href={buildControlCenterHref(nextYmd)} className="inline-flex h-7 w-7 items-center justify-center rounded text-ink-muted hover:bg-surface-muted" aria-label="Επόμενη ημέρα">
-            <ChevronRight className="h-3.5 w-3.5" />
+          <Link href={buildControlCenterHref(nextYmd)} className="inline-flex h-6 w-6 items-center justify-center rounded text-ink-muted hover:bg-surface-muted" aria-label="Επόμενη ημέρα">
+            <ChevronRight className="h-3 w-3" />
           </Link>
         </div>
       </div>
 
-      <details className="shrink-0 rounded-md border border-border bg-surface-card text-xs shadow-sm">
-        <summary className="cursor-pointer px-2 py-1 font-semibold text-ink-muted">Φίλτρα & κενά</summary>
+      <details className="shrink-0 rounded border border-border bg-surface-card text-[11px] shadow-sm">
+        <summary className="cursor-pointer px-1.5 py-0.5 font-semibold text-ink-muted">Φίλτρα & κενά (πλαϊνή μπάρα)</summary>
         <div className="space-y-2 border-t border-border/60 p-2">
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
           <FilterSelect label="Κέντρο" value={centerId} onChange={setCenterId} options={[{ v: "", l: "Όλα" }, ...CONTROL_CENTER_DEMO_CENTERS.map((c) => ({ v: c.id, l: c.name }))]} />
@@ -457,12 +448,12 @@ export function ScheduleControlCenter({ dateYmd }: Props) {
         ref={boardRef}
         className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
       >
-        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-200 bg-clinical-50/40 px-2 py-0.5 text-[9px] text-ink-muted">
+        <div className="flex shrink-0 items-center justify-between gap-1 border-b border-slate-200 bg-clinical-50/40 px-1.5 py-px text-[8px] text-ink-muted">
           <span>
-            <strong className="text-ink">45′</strong> · <strong className="text-violet-950">50′</strong> · <strong>21:00</strong>
+            <strong className="text-ink">45′</strong> · <strong className="text-violet-950">50′</strong> · 13:00–21:00
           </span>
           <span className="tabular-nums text-ink-faint">
-            {filtered.length} μπλοκ · {conflictBlockCount} σύγκρ.
+            {boardBlocks.length} μπλοκ · {conflictBlockCount} σύγκρ.
           </span>
         </div>
         <ScheduleScaleProvider
@@ -470,8 +461,8 @@ export function ScheduleControlCenter({ dateYmd }: Props) {
           gridSlotRef={gridSlotRef}
           side50Count={side50Columns.length}
           main45Count={main45Columns.length}
-          visibleBlocks={filtered}
-          therapistDisplayNames={therapistDisplayNames}
+          columnWidthBlocks={STABLE_COLUMN_WIDTH_BLOCKS}
+          therapistDisplayNames={STABLE_THERAPIST_DISPLAY_NAMES}
         >
           <ScheduleGridSlot gridSlotRef={gridSlotRef}>
             <ScheduleBoard

@@ -29,6 +29,15 @@ export default function SettingsPage() {
             <h2 className="text-base font-semibold text-ink">Κέντρα / Τοποθεσίες</h2>
             <p className="mt-2 text-sm text-ink-muted">Λίστα, στοιχεία επικοινωνίας και κατάσταση κέντρων.</p>
           </Link>
+          <Link
+            href="/settings/gdpr"
+            className="rounded-xl border border-clinical-200 bg-clinical-50/40 p-5 shadow-shell transition hover:border-clinical-400"
+          >
+            <h2 className="text-base font-semibold text-ink">GDPR & Απόρρητο</h2>
+            <p className="mt-2 text-sm text-ink-muted">
+              Συγκαταθέσεις, διατήρηση δεδομένων, audit log, νομική βάση και πολιτικές εξαγωγής.
+            </p>
+          </Link>
         </div>
       </section>
 

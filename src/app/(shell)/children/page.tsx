@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/shell/EmptyState";
 import { canMutateChildren } from "@/lib/auth/children-permissions";
 import { AUTH_GATING_TEMPORARILY_DISABLED, getSessionContext } from "@/lib/auth/get-session-context";
 import { listChildren } from "@/lib/data/children/queries";
+import { DEMO_CLINICAL_CHILD_ID } from "@/lib/demo/clinical-child-profile-demo";
 import { isSupabaseReachableQuickly } from "@/lib/supabase/availability";
 
 type ChildrenPageProps = {
@@ -71,10 +72,18 @@ export default async function ChildrenPage({ searchParams }: ChildrenPageProps) 
       <ChildSearchBar defaultQuery={q} />
 
       {supabaseUnavailable ? (
-        <EmptyState
-          title="Δεν είναι διαθέσιμο το μητρώο παιδιών"
-          description="Η σύνδεση με τη βάση Supabase δεν απαντά ή το περιβάλλον δεν έχει αρχικοποιηθεί. Εκτελέστε migrations και seed για να φορτώσουν οι εγγραφές επίδειξης."
-        />
+        <div className="space-y-4">
+          <EmptyState
+            title="Δεν είναι διαθέσιμο το μητρώο παιδιών"
+            description="Η σύνδεση με τη βάση Supabase δεν απαντά. Μπορείτε να ανοίξετε το πρωτότυπο κλινικού προφίλ με ενδεικτικά δεδομένα."
+          />
+          <Link
+            href={`/children/${DEMO_CLINICAL_CHILD_ID}`}
+            className="inline-flex rounded-xl bg-clinical-600 px-5 py-3 text-sm font-bold text-white shadow-md hover:bg-clinical-700"
+          >
+            Προβολή κλινικού προφίλ (πρωτότυπο) →
+          </Link>
+        </div>
       ) : (
         <ChildListTable items={items} canMutate={canMutate} />
       )}

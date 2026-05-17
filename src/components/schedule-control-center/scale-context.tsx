@@ -6,6 +6,7 @@ import {
   useContext,
   useLayoutEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
   type RefObject,
@@ -86,7 +87,8 @@ type ProviderProps = {
   gridSlotRef: RefObject<HTMLDivElement | null>;
   side50Count: number;
   main45Count: number;
-  visibleBlocks: ControlBoardBlock[];
+  /** Stable anchor-day blocks for column width — not UI-filtered blocks. */
+  columnWidthBlocks: ControlBoardBlock[];
   therapistDisplayNames: string[];
 };
 
@@ -96,28 +98,43 @@ export function ScheduleScaleProvider({
   gridSlotRef,
   side50Count,
   main45Count,
-  visibleBlocks,
+  columnWidthBlocks,
   therapistDisplayNames,
 }: ProviderProps) {
   const idealColWidth = useMemo(
-    () => computeIdealTherapistColWidth(visibleBlocks, therapistDisplayNames),
-    [visibleBlocks, therapistDisplayNames]
+    () => computeIdealTherapistColWidth(columnWidthBlocks, therapistDisplayNames),
+    [columnWidthBlocks, therapistDisplayNames]
   );
 
   const [gridPx, setGridPx] = useState(CC_GRID_PX_FALLBACK);
   const [fit, setFit] = useState(() => computeHorizontalFit(900, side50Count, main45Count, idealColWidth));
+  const idealColWidthRef = useRef(idealColWidth);
+  idealColWidthRef.current = idealColWidth;
 
   useLayoutEffect(() => {
+    let raf = 0;
     const measure = () => {
-      const boardEl = boardRef.current;
-      const slotEl = gridSlotRef.current;
-      const boardW = boardEl?.clientWidth ?? 0;
-      const slotH = slotEl?.clientHeight ?? 0;
-      const track = Math.floor(slotH - CC_RULER_HEADER_PX);
-      setGridPx(Math.max(CC_GRID_MIN_PX, track > 0 ? track : CC_GRID_PX_FALLBACK));
-      if (boardW > 0) {
-        setFit(computeHorizontalFit(boardW, side50Count, main45Count, idealColWidth));
-      }
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const boardEl = boardRef.current;
+        const slotEl = gridSlotRef.current;
+        const boardW = boardEl?.clientWidth ?? 0;
+        const slotH = slotEl?.clientHeight ?? 0;
+        const track = Math.floor(slotH - CC_RULER_HEADER_PX);
+        const nextGridPx = Math.max(CC_GRID_MIN_PX, track > 0 ? track : CC_GRID_PX_FALLBACK);
+        setGridPx((prev) => (Math.abs(prev - nextGridPx) < 1 ? prev : nextGridPx));
+        if (boardW > 0) {
+          const nextFit = computeHorizontalFit(boardW, side50Count, main45Count, idealColWidthRef.current);
+          setFit((prev) =>
+            prev.fitsWithoutHorizontalScroll === nextFit.fitsWithoutHorizontalScroll &&
+            Math.abs(prev.therapistColWidth - nextFit.therapistColWidth) < 1 &&
+            prev.timeRuler45W === nextFit.timeRuler45W &&
+            prev.timeRuler50W === nextFit.timeRuler50W
+              ? prev
+              : nextFit
+          );
+        }
+      });
     };
 
     measure();
@@ -126,10 +143,11 @@ export function ScheduleScaleProvider({
     if (gridSlotRef.current) ro.observe(gridSlotRef.current);
     window.addEventListener("resize", measure);
     return () => {
+      cancelAnimationFrame(raf);
       ro.disconnect();
       window.removeEventListener("resize", measure);
     };
-  }, [boardRef, gridSlotRef, side50Count, main45Count, idealColWidth]);
+  }, [boardRef, gridSlotRef, side50Count, main45Count]);
 
   const value = useMemo(
     () => ({

@@ -1,17 +1,17 @@
 import type { ControlBoardBlock } from "@/lib/schedule/control-center-model";
 import {
+  appointmentCellLines,
   blockHeadline,
   blockTimeRangeEl,
-  cellMetaLineForCell,
   childLineForCell,
 } from "./cell-visual";
 import { CC_CELL_COLUMN_PAD } from "./constants";
 
 /** Hard floor: two compact lines (name + meta) remain legible. */
-export const CC_THERAPIST_COL_MIN = 52;
+export const CC_THERAPIST_COL_MIN = 56;
 
 /** Hard ceiling: never allocate empty horizontal space in columns. */
-export const CC_THERAPIST_COL_MAX = 74;
+export const CC_THERAPIST_COL_MAX = 72;
 
 /** Inner horizontal padding in appointment cells (px-1 × 2). */
 export const CC_CELL_INNER_PAD_X = 8;
@@ -44,9 +44,12 @@ function blockContentWidthPx(block: ControlBoardBlock): number {
     return CC_CELL_INNER_PAD_X + lineW;
   }
 
-  const name = childLineForCell(block);
-  const meta = cellMetaLineForCell(block);
-  const lineW = Math.max(textWidthPx(name, PX_PER_CHAR_NAME), textWidthPx(meta, PX_PER_CHAR_META));
+  const { child, room, time } = appointmentCellLines(block);
+  const lineW = Math.max(
+    textWidthPx(child, PX_PER_CHAR_NAME),
+    textWidthPx(room, PX_PER_CHAR_META),
+    textWidthPx(time, PX_PER_CHAR_META)
+  );
   return CC_CELL_INNER_PAD_X + lineW;
 }
 

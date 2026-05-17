@@ -4,6 +4,19 @@ import { todayAthensYmd } from "@/lib/schedule/athens-civil";
 import { buildScheduleHref } from "@/lib/schedule/search-params";
 import { buildSessionNotesHref } from "@/lib/session-notes/search-params";
 import { buildTherapyGoalsHref } from "@/lib/therapy-goals/search-params";
+import { ChildDetailCommunicationButton } from "@/components/children/ChildDetailCommunicationButton";
+import { NewCommunicationLink } from "@/components/secretary/communications/NewCommunicationLink";
+import { ChildPaymentWarningsBanner } from "@/components/children/ChildPaymentWarningsBanner";
+import { ChildProfilePaymentBadge } from "@/components/children/ChildProfilePaymentBadge";
+import { ChildProfileTaskBadge } from "@/components/children/ChildProfileTaskBadge";
+import { ChildOpenTasksPanel } from "@/components/children/ChildOpenTasksPanel";
+import { ChildCommunicationSection } from "@/components/children/ChildCommunicationSection";
+import { ChildDiagnosisSection } from "@/components/children/ChildDiagnosisSection";
+import { ChildReportsSection } from "@/components/children/ChildReportsSection";
+import { ChildRemindersSection } from "@/components/children/ChildRemindersSection";
+import { ChildMeetingsSection } from "@/components/children/ChildMeetingsSection";
+import { ChildProfileDiagnosisBadge } from "@/components/children/ChildProfileDiagnosisBadge";
+import { ChildProfileReportBadge } from "@/components/children/ChildProfileReportBadge";
 import { ChildParentsPanel } from "@/components/children/child-parents-panel";
 import { ChildWorkflowTimeline } from "@/components/children/child-workflow-timeline";
 import { ProfileSectionCard } from "@/components/children/profile-section-card";
@@ -36,6 +49,7 @@ type ChildDetailBodyProps = {
   /** Γραμματεία / διοίκηση — νέα συνεδρία από το προφίλ. */
   canScheduleSessions: boolean;
   canWriteTherapyGoals: boolean;
+  canCommunicate: boolean;
   loadWarnings: string[];
 };
 
@@ -48,6 +62,7 @@ export function ChildDetailBody({
   canMutate,
   canScheduleSessions,
   canWriteTherapyGoals,
+  canCommunicate,
   loadWarnings,
 }: ChildDetailBodyProps) {
   const genderLabel =
@@ -65,12 +80,37 @@ export function ChildDetailBody({
         </div>
       ) : null}
 
+      {canCommunicate ? (
+        <>
+          <ChildPaymentWarningsBanner childId={child.id} />
+          <ChildOpenTasksPanel childId={child.id} childLabel={`${child.first_name} ${child.last_name}`} />
+          <ChildDiagnosisSection childId={child.id} childLabel={`${child.first_name} ${child.last_name}`} />
+          <ChildReportsSection childId={child.id} childLabel={`${child.first_name} ${child.last_name}`} />
+          <ChildRemindersSection
+            childId={child.id}
+            childLabel={`${child.first_name} ${child.last_name}`}
+            child={child}
+            parentLinks={parentLinks}
+          />
+          <ChildMeetingsSection childId={child.id} childLabel={`${child.first_name} ${child.last_name}`} />
+          <ChildCommunicationSection childId={child.id} childLabel={`${child.first_name} ${child.last_name}`} />
+        </>
+      ) : null}
+
       <header className="overflow-hidden rounded-3xl border border-clinical-100/80 bg-gradient-to-br from-white via-clinical-50/35 to-white p-6 shadow-shell sm:p-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-clinical-800">Προφίλ παιδιού</p>
-            <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
+            <h1 className="mt-1 flex flex-wrap items-center gap-2 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
               {child.first_name} {child.last_name}
+              {canCommunicate ? (
+                <>
+                  <ChildProfilePaymentBadge childId={child.id} />
+                  <ChildProfileTaskBadge childId={child.id} />
+                  <ChildProfileDiagnosisBadge childId={child.id} />
+                  <ChildProfileReportBadge childId={child.id} />
+                </>
+              ) : null}
             </h1>
             <p className="mt-2 text-sm text-ink-muted">
               {CHILD_STATUS_LABELS[child.status]}
@@ -104,6 +144,18 @@ export function ChildDetailBody({
               >
                 Νέα συνεδρία
               </Link>
+            ) : null}
+            {canCommunicate ? (
+              <>
+                <NewCommunicationLink
+                  params={{
+                    childId: child.id,
+                    childLabel: `${child.first_name} ${child.last_name}`,
+                  }}
+                  size="lg"
+                />
+                <ChildDetailCommunicationButton child={child} parentLinks={parentLinks} />
+              </>
             ) : null}
           </div>
         </div>

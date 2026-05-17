@@ -66,32 +66,23 @@ export const ScheduleGrid = memo(function ScheduleGrid({
         </div>
       ) : null}
       <div className={`flex shrink-0 ${fitsWithoutHorizontalScroll ? "" : "min-w-max"}`}>
-        {main45Columns.length === 0 && side50Columns.length > 0 ? (
-          <div
-            className="flex min-h-[120px] items-center justify-center px-2 text-center text-[10px] text-ink-muted"
-            style={{ width: therapistColWidth, minWidth: therapistColWidth }}
-          >
-            Δεν εμφανίζονται στήλες κύριου πλέγματος.
-          </div>
-        ) : (
-          main45Columns.map((col) => (
-            <TherapistColumn
-              key={col.userId}
-              columnKind="main45"
-              column={col}
-              {...colProps}
-              blocks={blocksByTherapist.get(col.userId) ?? []}
-              dateYmd={dateYmd}
-              win={win}
-              conflictMap={conflictMap}
-              selectedId={selectedId}
-              onSelect={onSelect}
-              showStructuredBreakShading={showPresetBreakMarkers}
-              freeOverlays={freeOverlaysByTherapist.get(col.userId)}
-              hideHeader
-            />
-          ))
-        )}
+        {main45Columns.map((col) => (
+          <TherapistColumn
+            key={col.userId}
+            columnKind="main45"
+            column={col}
+            {...colProps}
+            blocks={blocksByTherapist.get(col.userId) ?? []}
+            dateYmd={dateYmd}
+            win={win}
+            conflictMap={conflictMap}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            showStructuredBreakShading={showPresetBreakMarkers}
+            freeOverlays={freeOverlaysByTherapist.get(col.userId)}
+            hideHeader
+          />
+        ))}
       </div>
     </div>
   );

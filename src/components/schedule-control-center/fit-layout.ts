@@ -27,7 +27,7 @@ export function computeHorizontalFit(
   const hasSide = side50Count > 0;
   const hasMain = main45Count > 0;
 
-  let timeRuler45W = hasSide && hasMain ? 38 : hasMain || hasSide ? 40 : CC_TIME_RULER_45_MIN_W;
+  let timeRuler45W = hasSide && hasMain ? CC_TIME_RULER_45_MIN_W : hasMain || hasSide ? CC_TIME_RULER_45_MIN_W + 2 : CC_TIME_RULER_45_MIN_W;
   let timeRuler50W = hasSide ? CC_TIME_RULER_50_MIN_W : 0;
   const timeRulersTotalW = timeRuler45W + timeRuler50W;
 

@@ -40,7 +40,22 @@ export function roomCompactForCell(b: ControlBoardBlock): string {
 
 /** Συμπαγής 2η γραμμή κελιού: αίθουσα · χρονικό εύρος. */
 export function cellMetaLineForCell(b: ControlBoardBlock): string {
-  return `${roomCompactForCell(b)} · ${blockTimeRangeEl(b)}`;
+  return `${roomLineForCell(b)} · ${blockTimeRangeEl(b)}`;
+}
+
+export function roomLineForCell(b: ControlBoardBlock): string {
+  const n = roomCompactForCell(b);
+  if (n === "—") return "—";
+  return `Αίθ. ${n}`;
+}
+
+/** Τρεις γραμμές κειμένου για κελί ραντεβού (παιδί · αίθουσα · ώρα). */
+export function appointmentCellLines(b: ControlBoardBlock): { child: string; room: string; time: string } {
+  return {
+    child: childLineForCell(b),
+    room: roomLineForCell(b),
+    time: blockTimeRangeEl(b),
+  };
 }
 
 export function disciplineVisual(b: ControlBoardBlock): DisciplineVisual {

@@ -6,6 +6,8 @@ import { useMemo, useState } from "react";
 import { Menu, X } from "lucide-react";
 import type { RoleCode } from "@/lib/auth/roles";
 import { navItemsForRoles } from "@/lib/auth/nav-config";
+import { canAccessSecretaryModule } from "@/lib/auth/secretary-permissions";
+import { SecretarySidebarSection } from "@/components/shell/SecretarySidebarSection";
 
 type AppSidebarProps = {
   roleCodes: RoleCode[];
@@ -40,6 +42,7 @@ export function AppSidebar({ roleCodes }: AppSidebarProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const items = useMemo(() => navItemsForRoles(roleCodes), [roleCodes]);
+  const showSecretary = canAccessSecretaryModule(roleCodes);
   const primaryItems = items.filter((item) => item.href === "/dashboard");
   const workflowItems = items.filter((item) => WORKFLOW_NAV.has(item.href));
   const adminItems = items.filter((item) => ADMIN_NAV.has(item.href));
@@ -85,6 +88,7 @@ export function AppSidebar({ roleCodes }: AppSidebarProps) {
   const nav = (
     <nav className="flex flex-1 flex-col gap-5 p-3" aria-label="Κύρια πλοήγηση">
       {renderSection("Πίνακας", primaryItems)}
+      {showSecretary ? <SecretarySidebarSection roleCodes={roleCodes} onNavigate={() => setOpen(false)} /> : null}
       {renderSection("Καθημερινή λειτουργία", workflowItems)}
       {renderSection("Διοίκηση & υποδομή", adminItems)}
     </nav>

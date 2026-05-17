@@ -3,7 +3,7 @@
  * Αποκλειστικά client/server module· χωρίς Supabase· χωρίς αλλαγή σχήματος βάσης.
  */
 
-import { athensStartOfDayUtcIso } from "@/lib/schedule/athens-civil";
+import { athensStartOfDayUtcIso, getSafeAthensYmd } from "@/lib/schedule/athens-civil";
 import { annotateConflicts } from "@/lib/schedule/control-center-model";
 import type { ControlBoardBlock } from "@/lib/schedule/control-center-model";
 import type { SessionKind, SessionStatus } from "@/lib/data/sessions/types";
@@ -415,7 +415,7 @@ export const CONTROL_CENTER_DEMO_SUMMARY_METRICS = {
  * Μετατοπίζει όλα τα μπλοκ από την ημέρα αγκύρωσης στην επιλεγμένη πολιτική ημέρα Αθήνας (ίδια σχετική διάταξη 13:00–21:00).
  */
 export function shiftControlCenterDemoBlocksToYmd(ymd: string): ControlBoardBlock[] {
-  const target = YMD_SAFE.test(ymd) ? ymd : CONTROL_CENTER_DEMO_ANCHOR_YMD;
+  const target = getSafeAthensYmd(ymd);
   if (target === CONTROL_CENTER_DEMO_ANCHOR_YMD) {
     return CONTROL_CENTER_DEMO_SESSION_BLOCKS;
   }

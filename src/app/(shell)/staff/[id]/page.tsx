@@ -15,6 +15,7 @@ import {
 import { PageHeader } from "@/components/shell/PageHeader";
 import { employmentStatusLabelEl } from "@/lib/ui/staff-labels";
 import { formatDateEl } from "@/lib/ui/child-labels";
+import { StaffMeetingsSection } from "@/components/staff/StaffMeetingsSection";
 
 type StaffDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -148,13 +149,10 @@ export default async function StaffDetailPage({ params }: StaffDetailPageProps) 
         )}
       </section>
 
-      <section className="mx-auto max-w-3xl rounded-xl border border-dashed border-border bg-surface-muted/20 p-6">
-        <h2 className="text-base font-semibold text-ink">Επέκταση εποπτείας</h2>
-        <p className="mt-2 text-sm text-ink-muted">
-          Σενάρια εβδομαδιαίας εποπτείας, αρχεία και βαθμολόγηση θα προστεθούν μετά το MVP (χωρίς αλλαγή στη βάση
-          εδώ).
-        </p>
-      </section>
+      <StaffMeetingsSection
+        staffLabel={fullName}
+        department={item.discipline_name_el ?? item.discipline_code}
+      />
 
       <section className="mx-auto mt-8 max-w-3xl rounded-xl border border-border bg-surface-card p-6 shadow-shell">
         <h2 className="text-base font-semibold text-ink">Ανατεθειμένες συνεδρίες (ως θεραπευτής)</h2>

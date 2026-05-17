@@ -22,10 +22,10 @@ function minutesFromWindowStart(iv: { startMs: number; endMs: number }, win: Win
 export function minCellInnerHeight(block: ControlBoardBlock, laneCount: number): number {
   const dm = Math.round(blockDurationMinutes(block));
   const isBreak = block.disciplineCode === "brk";
-  if (isBreak) return dm <= 10 ? 10 : 13;
-  if (dm >= 90 && block.sessionKind === "group") return laneCount > 1 ? 30 : 32;
-  if (dm >= 50) return laneCount > 1 ? 20 : 22;
-  return laneCount > 1 ? 18 : 20;
+  if (isBreak) return dm <= 10 ? 12 : 14;
+  if (dm >= 90 && block.sessionKind === "group") return laneCount > 1 ? 32 : 34;
+  if (dm >= 50) return laneCount > 1 ? 22 : 24;
+  return laneCount > 1 ? 20 : 22;
 }
 
 /**
@@ -71,7 +71,7 @@ export function computeCellRect(params: {
   const maxBottom = gridPx - CC_CELL_INSET_V;
   if (top + height > maxBottom) height = Math.max(minH, maxBottom - top);
 
-  const compact = isBreak ? height < 16 : height < 24;
+  const compact = isBreak ? height < 14 : height < 22;
 
   return {
     top: Math.round(top),
