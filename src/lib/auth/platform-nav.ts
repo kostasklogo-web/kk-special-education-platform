@@ -3,6 +3,7 @@ import {
   Activity,
   BarChart3,
   Brain,
+  Award,
   Bell,
   Building2,
   CalendarDays,
@@ -300,6 +301,16 @@ export const PLATFORM_NAV_GROUPS: PlatformNavGroup[] = [
         activePrefixes: ["/management/predictive-intelligence"],
         badge: "mvp",
       }),
+      item({
+        id: "management-hr-performance",
+        href: "/management/hr-performance",
+        label: "HR Απόδοση & Incentives",
+        helper: "Απόδοση, κίνητρα & burnout · κλινικά ασφαλές KPIs",
+        icon: Award,
+        anyOf: ["ORG_OWNER", "ORG_ADMIN", "SUPERVISOR", "THERAPIST"],
+        activePrefixes: ["/management/hr-performance"],
+        badge: "mvp",
+      }),
     ],
   },
   {
@@ -386,24 +397,25 @@ export function isPlatformNavItemActive(pathname: string, item: PlatformNavItem)
   });
 }
 
+/** Primary hub cards on `/` — fixed order, role-filtered via nav groups. */
+const PLATFORM_QUICK_CARD_ORDER = [
+  "schedule-control-center",
+  "children-registry",
+  "secretary-dashboard",
+  "secretary-finances",
+  "management-analytics",
+  "management-ops-intel",
+] as const;
+
 /** Flat list of primary module cards for the landing dashboard. */
 export function platformQuickModuleCards(roleCodes: RoleCode[]): PlatformNavItem[] {
-  const ids = new Set([
-    "schedule-control-center",
-    "children-registry",
-    "clinical-profile",
-    "secretary-dashboard",
-    "secretary-schedule",
-    "secretary-tasks",
-    "attendance",
-    "reports-clinical",
-  ]);
-
-  const out: PlatformNavItem[] = [];
+  const byId = new Map<string, PlatformNavItem>();
   for (const group of platformNavGroupsForRoles(roleCodes)) {
     for (const navItem of group.items) {
-      if (ids.has(navItem.id)) out.push(navItem);
+      byId.set(navItem.id, navItem);
     }
   }
-  return out;
+  return PLATFORM_QUICK_CARD_ORDER.map((id) => byId.get(id)).filter(
+    (item): item is PlatformNavItem => item != null
+  );
 }

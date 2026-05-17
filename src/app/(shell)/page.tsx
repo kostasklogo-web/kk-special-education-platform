@@ -57,7 +57,7 @@ export default async function PlatformHomePage() {
 
       {caseloadPanel}
       <PlatformModuleCards roleCodes={ctx.roleCodes} />
-      <PlatformQuickNavPanel />
+      <PlatformQuickNavPanel roleCodes={ctx.roleCodes} />
       <PlatformSecretaryTodayStrip roleCodes={ctx.roleCodes} />
       <OperationalDashboardContent embedded />
     </div>

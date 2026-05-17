@@ -3,6 +3,11 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Clock, Pin, Star, UsersRound } from "lucide-react";
+import type { RoleCode } from "@/lib/auth/roles";
+import { canAccessSecretaryModule } from "@/lib/auth/secretary-permissions";
+import { canViewManagementAnalytics } from "@/lib/management/analytics/permissions";
+import { canViewOperationsIntelligence } from "@/lib/management/operations-intelligence/permissions";
+import { canViewFinancesModule } from "@/lib/secretary/finances/permissions";
 import { DEMO_CLINICAL_CHILD_ID } from "@/lib/demo/clinical-demo-ids";
 
 const STORAGE_RECENT = "platform-recent-children";
@@ -14,8 +19,11 @@ type FavoriteModule = { href: string; label: string };
 
 const DEFAULT_FAVORITES: FavoriteModule[] = [
   { href: "/schedule/control-center", label: "Πίνακας προγράμματος" },
+  { href: "/children", label: "Παιδιά" },
   { href: "/secretary/dashboard", label: "Γραμματεία" },
-  { href: `/children/${DEMO_CLINICAL_CHILD_ID}`, label: "Κλινικός φάκελος" },
+  { href: "/secretary/finances", label: "Οικονομικά" },
+  { href: "/management/analytics", label: "Αναλυτικά" },
+  { href: "/management/operations-intelligence", label: "Ops Intelligence" },
 ];
 
 const DEFAULT_RECENT: RecentChild[] = [
@@ -34,6 +42,18 @@ function readJson<T>(key: string, fallback: T): T {
 }
 
 /** Tracks child profile visits for the landing quick panel. */
+function favoritesForRoles(favorites: FavoriteModule[], roleCodes: RoleCode[]): FavoriteModule[] {
+  return favorites.filter((f) => {
+    if (f.href === "/secretary/finances") return canViewFinancesModule(roleCodes);
+    if (f.href.startsWith("/secretary/")) return canAccessSecretaryModule(roleCodes);
+    if (f.href.startsWith("/management/analytics")) return canViewManagementAnalytics(roleCodes);
+    if (f.href.startsWith("/management/operations-intelligence")) {
+      return canViewOperationsIntelligence(roleCodes);
+    }
+    return true;
+  });
+}
+
 export function trackRecentChildVisit(childId: string, label: string) {
   if (typeof window === "undefined") return;
   const list = readJson<RecentChild[]>(STORAGE_RECENT, DEFAULT_RECENT);
@@ -41,9 +61,16 @@ export function trackRecentChildVisit(childId: string, label: string) {
   localStorage.setItem(STORAGE_RECENT, JSON.stringify(next));
 }
 
-export function PlatformQuickNavPanel() {
+type Props = { roleCodes: RoleCode[] };
+
+export function PlatformQuickNavPanel({ roleCodes }: Props) {
   const [recent, setRecent] = useState<RecentChild[]>(DEFAULT_RECENT);
   const [favorites, setFavorites] = useState<FavoriteModule[]>(DEFAULT_FAVORITES);
+  const visibleFavorites = favoritesForRoles(favorites, roleCodes);
+  const showSecretary = canAccessSecretaryModule(roleCodes);
+  const showFinances = canViewFinancesModule(roleCodes);
+  const showAnalytics = canViewManagementAnalytics(roleCodes);
+  const showOpsIntel = canViewOperationsIntelligence(roleCodes);
 
   const hydrate = useCallback(() => {
     setRecent(readJson(STORAGE_RECENT, DEFAULT_RECENT));
@@ -70,18 +97,44 @@ export function PlatformQuickNavPanel() {
               Κεντρικός πίνακας →
             </Link>
           </li>
+          {showSecretary ? (
+            <li className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2">
+              <span className="text-ink-muted">Γραμματεία</span>
+              <Link href="/secretary/dashboard" className="font-semibold text-ink hover:underline">
+                Πίνακας γραμματείας →
+              </Link>
+            </li>
+          ) : null}
+          {showFinances ? (
+            <li className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2">
+              <span className="text-ink-muted">Οικονομικά</span>
+              <Link href="/secretary/finances" className="font-semibold text-ink hover:underline">
+                Οικονομικά κέντρα →
+              </Link>
+            </li>
+          ) : null}
           <li className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2">
-            <span className="text-ink-muted">Γραμματεία</span>
-            <Link href="/secretary/dashboard" className="font-semibold text-ink hover:underline">
-              Πίνακας γραμματείας →
+            <span className="text-ink-muted">Παιδιά</span>
+            <Link href="/children" className="font-semibold text-ink hover:underline">
+              Μητρώο →
             </Link>
           </li>
-          <li className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2">
-            <span className="text-ink-muted">Εκκρεμότητες</span>
-            <Link href="/secretary/tasks" className="font-semibold text-ink hover:underline">
-              Tasks →
-            </Link>
-          </li>
+          {showAnalytics ? (
+            <li className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2">
+              <span className="text-ink-muted">Διοίκηση</span>
+              <Link href="/management/analytics" className="font-semibold text-ink hover:underline">
+                Αναλυτικά →
+              </Link>
+            </li>
+          ) : null}
+          {showOpsIntel ? (
+            <li className="flex items-center justify-between gap-2 rounded-lg border border-border px-3 py-2">
+              <span className="text-ink-muted">Ops Intelligence</span>
+              <Link href="/management/operations-intelligence" className="font-semibold text-ink hover:underline">
+                Λειτουργική intelligence →
+              </Link>
+            </li>
+          ) : null}
         </ul>
       </section>
 
@@ -91,7 +144,7 @@ export function PlatformQuickNavPanel() {
           <h2 className="text-sm font-semibold text-ink">Αγαπημένα modules</h2>
         </div>
         <ul className="flex flex-wrap gap-2">
-          {favorites.map((f) => (
+          {visibleFavorites.map((f) => (
             <li key={f.href}>
               <Link
                 href={f.href}
