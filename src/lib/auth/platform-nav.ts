@@ -1,6 +1,8 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Activity,
   BarChart3,
+  Brain,
   Bell,
   Building2,
   CalendarDays,
@@ -23,7 +25,7 @@ import {
 } from "lucide-react";
 import type { RoleCode } from "@/lib/auth/roles";
 import { canAccessSecretaryModule } from "@/lib/auth/secretary-permissions";
-import { DEMO_CLINICAL_CHILD_ID } from "@/lib/demo/clinical-child-profile-demo";
+import { DEMO_CLINICAL_CHILD_ID } from "@/lib/demo/clinical-demo-ids";
 
 export type PlatformNavItem = {
   id: string;
@@ -259,6 +261,44 @@ export const PLATFORM_NAV_GROUPS: PlatformNavGroup[] = [
         helper: "Γονείς, σχολεία, γιατροί",
         icon: MessageSquare,
         anyOf: ["ORG_OWNER", "ORG_ADMIN", "RECEPTION"],
+      }),
+    ],
+  },
+  {
+    id: "management",
+    label: "Διοίκηση",
+    icon: BarChart3,
+    defaultOpen: false,
+    items: [
+      item({
+        id: "management-analytics",
+        href: "/management/analytics",
+        label: "Αναλυτικά Στοιχεία",
+        helper: "Αναφορές & συγκρίσεις περιόδων · πρωτότυπο",
+        icon: BarChart3,
+        anyOf: ["ORG_OWNER", "ORG_ADMIN", "RECEPTION"],
+        activePrefixes: ["/management/analytics"],
+        badge: "mvp",
+      }),
+      item({
+        id: "management-ops-intel",
+        href: "/management/operations-intelligence",
+        label: "Operational Intelligence",
+        helper: "Κίνδυνοι, bottlenecks & alerts · πρωτότυπο",
+        icon: Activity,
+        anyOf: ["ORG_OWNER", "ORG_ADMIN", "SUPERVISOR"],
+        activePrefixes: ["/management/operations-intelligence"],
+        badge: "mvp",
+      }),
+      item({
+        id: "management-predictive",
+        href: "/management/predictive-intelligence",
+        label: "Predictive Intelligence",
+        helper: "Πρόβλεψη κινδύνων & τάσεων · πρωτότυπο",
+        icon: Brain,
+        anyOf: ["ORG_OWNER", "ORG_ADMIN"],
+        activePrefixes: ["/management/predictive-intelligence"],
+        badge: "mvp",
       }),
     ],
   },

@@ -18,7 +18,7 @@ type Props = {
   onChange: (patch: Partial<ScheduleFilterState>) => void;
   therapists: ScheduleSelectOption[];
   rooms: ScheduleSelectOption[];
-  children: ScheduleSelectOption[];
+  childOptions: ScheduleSelectOption[];
   appointmentTypes: { code: string; nameEl: string }[];
 };
 
@@ -33,7 +33,7 @@ export function ScheduleFilterBar({
   onChange,
   therapists,
   rooms,
-  children,
+  childOptions,
   appointmentTypes,
 }: Props) {
   const anchorYmd = getSafeAthensYmd(filters.dateYmd);
@@ -135,7 +135,7 @@ export function ScheduleFilterBar({
           Παιδί
           <select className={`${selectCls} mt-1`} value={filters.childId} onChange={(e) => onChange({ childId: e.target.value })}>
             <option value="">Όλα</option>
-            {children.map((c) => (
+            {childOptions.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.label}
               </option>

@@ -5,8 +5,12 @@ import { PageHeader } from "@/components/shell/PageHeader";
 import { EmptyState } from "@/components/shell/EmptyState";
 import { canMutateChildren } from "@/lib/auth/children-permissions";
 import { AUTH_GATING_TEMPORARILY_DISABLED, getSessionContext } from "@/lib/auth/get-session-context";
-import { listChildren } from "@/lib/data/children/queries";
-import { DEMO_CLINICAL_CHILD_ID } from "@/lib/demo/clinical-child-profile-demo";
+import { filterChildrenForClinicalScope } from "@/lib/clinical/access/filter-children-list";
+import { loadClinicalAccessScope } from "@/lib/clinical/access/load-clinical-access-scope";
+import { shouldUseClinicalAccessDemoFallback } from "@/lib/clinical/access/clinical-access-demo-fallback";
+import { getDefaultOrganizationIdForUser, listChildren } from "@/lib/data/children/queries";
+import { DEMO_CLINICAL_CHILD_ID } from "@/lib/demo/clinical-demo-ids";
+import { getDemoChildrenListStubs } from "@/lib/demo/demo-children-registry";
 import { isSupabaseReachableQuickly } from "@/lib/supabase/availability";
 
 type ChildrenPageProps = {
@@ -17,35 +21,57 @@ export default async function ChildrenPage({ searchParams }: ChildrenPageProps) 
   const { q } = await searchParams;
   const ctx = await getSessionContext();
   const canMutate = canMutateChildren(ctx.roleCodes);
-  const supabaseUnavailable = AUTH_GATING_TEMPORARILY_DISABLED && !(await isSupabaseReachableQuickly());
-  const { items, error } = supabaseUnavailable
-    ? { items: [], error: null }
-    : await listChildren({ search: q });
+  const useClinicalDemo = await shouldUseClinicalAccessDemoFallback();
+  const supabaseUnavailable =
+    AUTH_GATING_TEMPORARILY_DISABLED && !(await isSupabaseReachableQuickly());
 
+  let rawItems: Awaited<ReturnType<typeof listChildren>>["items"] = [];
+  let error: string | null = null;
+  if (!(supabaseUnavailable && !useClinicalDemo)) {
+    const listed = await listChildren({ search: q }).catch(() => ({
+      items: [] as Awaited<ReturnType<typeof listChildren>>["items"],
+      error: null as string | null,
+    }));
+    rawItems = listed.items;
+    error = listed.error;
+  }
+
+  if (useClinicalDemo && rawItems.length === 0) {
+    rawItems = getDemoChildrenListStubs();
+    error = null;
+  }
+
+  const { organizationId } = await getDefaultOrganizationIdForUser();
+  const clinicalScope = await loadClinicalAccessScope({
+    organizationId: organizationId ?? "",
+    userId: ctx.user?.id ?? null,
+    roleCodes: ctx.roleCodes,
+  });
+
+  const items = filterChildrenForClinicalScope(rawItems, clinicalScope);
   const listedCount = items.length;
+  const showClinicalPrototypeBanner = useClinicalDemo || supabaseUnavailable;
 
   return (
     <div className="space-y-6">
       <PageHeader
         eyebrow="Μητρώο ωφελούμενων"
-        title="Παιδιά και πρόγραμμα"
-        description="Κεντρικό μητρώο ωφελούμενων ανά οργανισμό και κέντρο λειτουργίας. Η πρόσβαση στις εγγραφές ρυθμίζεται από τους ρόλους και τις πολιτικές ασφαλείας της βάσης."
+        title="Παιδιά — κλινική caseload"
+        description="Κλινικό μητρώο ωφελούμενων. Η πρόσβαση βασίζεται σε ενεργές αναθέσεις θεραπευτή–παιδιού (όχι ιστορικό συνεδριών)."
         meta={
-          !supabaseUnavailable && !error ? (
-            <span>
-              Εμφανίζονται <strong className="font-semibold text-ink-muted">{listedCount}</strong> εγγραφές
-              {q ? (
-                <>
-                  {" "}
-                  για «<span className="font-medium text-ink">{q}</span>»
-                </>
-              ) : null}
-              .
-            </span>
-          ) : null
+          <span>
+            Εμφανίζονται <strong className="font-semibold text-ink-muted">{listedCount}</strong> εγγραφές
+            {q ? (
+              <>
+                {" "}
+                για «<span className="font-medium text-ink">{q}</span>»
+              </>
+            ) : null}
+            .
+          </span>
         }
         actions={
-          canMutate ? (
+          canMutate && !useClinicalDemo ? (
             <Link
               href="/children/new"
               className="inline-flex rounded-lg bg-clinical-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-clinical-700"
@@ -56,10 +82,27 @@ export default async function ChildrenPage({ searchParams }: ChildrenPageProps) 
         }
       />
 
+      {showClinicalPrototypeBanner ? (
+        <div className="rounded-xl border border-amber-200/90 bg-gradient-to-r from-amber-50 to-white px-4 py-3 text-sm leading-relaxed text-amber-950 shadow-sm">
+          <strong className="font-semibold">Πρωτότυπο κλινικού μητρώου:</strong> Ενδεικτικά παιδιά με
+          ενεργές αναθέσεις. Ανοίξτε φάκελο από τον πίνακα ή{" "}
+          <Link href={`/children/${DEMO_CLINICAL_CHILD_ID}`} className="font-semibold text-clinical-700 underline">
+            κύριο demo παιδί
+          </Link>
+          .
+        </div>
+      ) : null}
+
       {!canMutate ? (
         <div className="rounded-xl border border-sky-200/90 bg-gradient-to-r from-sky-50 to-white px-4 py-3 text-sm leading-relaxed text-sky-950 shadow-sm">
-          <strong className="font-semibold">Λειτουργία προβολής:</strong> Ο ρόλος σας επιτρέπει μόνο ανάγνωση (π.χ. θεραπευτής ή
-          επόπτης). Η προσθήκη και η επεξεργασία φακέλων απαιτεί <strong>γραμματεία</strong> ή <strong>διοίκηση</strong>.
+          <strong className="font-semibold">Λειτουργία προβολής:</strong> Ο ρόλος σας επιτρέπει μόνο ανάγνωση.
+          {clinicalScope.assignedChildIds.length > 0 ? (
+            <>
+              {" "}
+              Εμφανίζονται μόνο παιδιά με <strong>ενεργή κλινική ανάθεση</strong> (
+              {clinicalScope.assignedChildIds.length}).
+            </>
+          ) : null}
         </div>
       ) : null}
 
@@ -71,21 +114,17 @@ export default async function ChildrenPage({ searchParams }: ChildrenPageProps) 
 
       <ChildSearchBar defaultQuery={q} />
 
-      {supabaseUnavailable ? (
-        <div className="space-y-4">
-          <EmptyState
-            title="Δεν είναι διαθέσιμο το μητρώο παιδιών"
-            description="Η σύνδεση με τη βάση Supabase δεν απαντά. Μπορείτε να ανοίξετε το πρωτότυπο κλινικού προφίλ με ενδεικτικά δεδομένα."
-          />
-          <Link
-            href={`/children/${DEMO_CLINICAL_CHILD_ID}`}
-            className="inline-flex rounded-xl bg-clinical-600 px-5 py-3 text-sm font-bold text-white shadow-md hover:bg-clinical-700"
-          >
-            Προβολή κλινικού προφίλ (πρωτότυπο) →
-          </Link>
-        </div>
+      {items.length === 0 ? (
+        <EmptyState
+          title="Δεν βρέθηκαν παιδιά"
+          description={
+            useClinicalDemo
+              ? "Δεν υπάρχουν παιδιά στο πεδίο αναζήτησης ή δεν έχετε ενεργή ανάθεση."
+              : "Δοκιμάστε άλλη αναζήτηση ή επικοινωνήστε με τον επόπτη."
+          }
+        />
       ) : (
-        <ChildListTable items={items} canMutate={canMutate} />
+        <ChildListTable items={items} canMutate={canMutate && !useClinicalDemo} />
       )}
     </div>
   );

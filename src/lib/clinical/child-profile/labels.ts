@@ -2,14 +2,16 @@ import type { ClinicalProfileTab, ClinicalTimelineEventKind } from "./types";
 
 export const CLINICAL_PROFILE_TAB_LABELS: Record<ClinicalProfileTab, string> = {
   overview: "Επισκόπηση",
-  alerts: "Ειδοποιήσεις",
-  timeline: "Χρονολόγιο",
+  evaluations: "Αξιολογήσεις",
   goals: "Στόχοι",
   notes: "Σημειώσεις",
+  progress: "Πρόοδος",
   reports: "Αναφορές",
-  evaluations: "Αξιολογήσεις",
-  interdisciplinary: "Διεπιπέδουση",
+  interdisciplinary: "Διεπιστημονική",
   supervision: "Εποπτεία",
+  confidential: "Εμπιστευτικά",
+  alerts: "Ειδοποιήσεις",
+  timeline: "Χρονολόγιο",
 };
 
 export const TIMELINE_KIND_LABELS: Record<ClinicalTimelineEventKind, string> = {
@@ -22,7 +24,7 @@ export const TIMELINE_KIND_LABELS: Record<ClinicalTimelineEventKind, string> = {
   parent_guidance: "Καθοδήγηση γονέων",
   school_collaboration: "Συνεργασία σχολείου",
   therapeutic_change: "Θεραπευτική προσαρμογή",
-  interdisciplinary: "Διεπιπληρωματική παρατήρηση",
+  interdisciplinary: "Διεπιστημονική παρατήρηση",
 };
 
 export const SESSION_KIND_LABELS_EL: Record<string, string> = {

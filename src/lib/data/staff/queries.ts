@@ -1,5 +1,11 @@
 import "server-only";
 
+import {
+  isSupabaseFetchFailure,
+  shouldUseClinicalAccessDemoFallback,
+  warnClinicalAccessDemoFallback,
+} from "@/lib/clinical/access/clinical-access-demo-fallback";
+import { getDemoSuperviseeUserIds } from "@/lib/demo/therapist-assignments-demo";
 import type { RoleCode } from "@/lib/auth/roles";
 import { ROLE_CODES } from "@/lib/auth/roles";
 import { createClient } from "@/lib/supabase/server";
@@ -56,23 +62,42 @@ export async function listSuperviseeUserIds(params: {
   organizationId: string;
   supervisorUserId: string;
 }): Promise<{ ids: Set<string>; error: string | null }> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("supervision_relationships")
-    .select("supervisee_user_id")
-    .eq("organization_id", params.organizationId)
-    .eq("supervisor_user_id", params.supervisorUserId)
-    .is("deleted_at", null);
-
-  if (error) {
-    console.error("listSuperviseeUserIds", error.message);
-    return { ids: new Set(), error: "Αποτυχία φόρτωσης ομάδας εποπτείας." };
+  const useDemoFallback = await shouldUseClinicalAccessDemoFallback();
+  if (useDemoFallback) {
+    warnClinicalAccessDemoFallback();
+    return {
+      ids: new Set(getDemoSuperviseeUserIds(params.supervisorUserId)),
+      error: null,
+    };
   }
 
-  const ids = new Set<string>(
-    (data ?? []).map((row: { supervisee_user_id: string }) => row.supervisee_user_id)
-  );
-  return { ids, error: null };
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("supervision_relationships")
+      .select("supervisee_user_id")
+      .eq("organization_id", params.organizationId)
+      .eq("supervisor_user_id", params.supervisorUserId)
+      .is("deleted_at", null);
+
+    if (error) {
+      if (isSupabaseFetchFailure(error)) {
+        return { ids: new Set(), error: "Αποτυχία φόρτωσης ομάδας εποπτείας." };
+      }
+      console.error("listSuperviseeUserIds", error.message);
+      return { ids: new Set(), error: "Αποτυχία φόρτωσης ομάδας εποπτείας." };
+    }
+
+    const ids = new Set<string>(
+      (data ?? []).map((row: { supervisee_user_id: string }) => row.supervisee_user_id)
+    );
+    return { ids, error: null };
+  } catch (err) {
+    if (isSupabaseFetchFailure(err)) {
+      return { ids: new Set(), error: "Αποτυχία φόρτωσης ομάδας εποπτείας." };
+    }
+    throw err;
+  }
 }
 
 export async function listStaffForOrganization(params: {

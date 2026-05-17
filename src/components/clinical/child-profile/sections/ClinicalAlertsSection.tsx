@@ -10,7 +10,7 @@ const KIND_LABELS: Record<string, string> = {
   regression_concern: "Παλινδρόμηση",
   attendance_impact: "Παρουσία (κλινικά)",
   supervision_urgent: "Εποπτεία",
-  interdisciplinary_review: "Διεπιπέδωση",
+  interdisciplinary_review: "Διεπιστημονική",
   stale_goal: "Ληγμένοι στόχοι",
   draft_report_overdue: "Αναφορές",
 };

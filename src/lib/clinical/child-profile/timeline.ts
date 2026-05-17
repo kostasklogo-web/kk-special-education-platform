@@ -113,7 +113,7 @@ export function buildClinicalTimeline(input: {
         id: `idt-${n.id}`,
         kind: "interdisciplinary",
         occurredAt: n.finalized_at ?? n.session_starts_at ?? n.updated_at,
-        title: "Διεπιπληρωματική παρατήρηση",
+        title: "Διεπιστημονική παρατήρηση",
         summary: excerpt(n.observations),
         disciplineLabel: n.discipline_name_el,
         therapistName: n.author_display_name ?? n.therapist_name,

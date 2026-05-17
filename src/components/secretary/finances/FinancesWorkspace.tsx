@@ -5,6 +5,7 @@ import {
   BarChart3,
   Bell,
   Building2,
+  CalendarDays,
   LayoutDashboard,
   LineChart,
   PieChart,
@@ -14,12 +15,15 @@ import {
   TrendingUp,
   Wallet,
 } from "lucide-react";
+import { formatEuro } from "@/lib/secretary/finances/labels";
 import type { RoleCode } from "@/lib/auth/roles";
 import { buildExecutiveFinanceModel } from "@/lib/secretary/finances/executive-model";
 import { FINANCE_ALERTS } from "@/lib/secretary/finances/demo-data";
 import { canViewFullFinances } from "@/lib/secretary/finances/permissions";
 import { FinancesPrototypeBanner } from "./FinancesPrototypeBanner";
 import { FinancesRoleBanner } from "./FinancesRoleBanner";
+import { FinancesScheduleFallbackBanner } from "./FinancesScheduleFallbackBanner";
+import { FinancesWorkspaceErrorBoundary } from "./FinancesWorkspaceErrorBoundary";
 import {
   AlertsSection,
   BudgetSection,
@@ -31,9 +35,11 @@ import {
   RevenueAnalysisSection,
   TransactionsSection,
 } from "./FinanceSections";
+import { ScheduleFinanceSection } from "./ScheduleFinanceSection";
 
 type SectionId =
   | "dashboard"
+  | "schedule"
   | "cashflow"
   | "budget"
   | "revenue"
@@ -45,6 +51,7 @@ type SectionId =
 
 const SECTIONS: { id: SectionId; label: string; icon: typeof LayoutDashboard; managementPreferred?: boolean }[] = [
   { id: "dashboard", label: "Διοικητικός πίνακας", icon: LayoutDashboard },
+  { id: "schedule", label: "Πρόγραμμα & χρεώσεις", icon: CalendarDays },
   { id: "cashflow", label: "Ταμειακή ροή", icon: TrendingUp, managementPreferred: true },
   { id: "budget", label: "Προϋπολογισμός", icon: Target, managementPreferred: true },
   { id: "revenue", label: "Ανάλυση εσόδων", icon: PieChart },
@@ -57,17 +64,19 @@ const SECTIONS: { id: SectionId; label: string; icon: typeof LayoutDashboard; ma
 
 type Props = { roleCodes: RoleCode[] };
 
-export function FinancesWorkspace({ roleCodes }: Props) {
+function FinancesWorkspaceInner({ roleCodes }: Props) {
   const fullAccess = canViewFullFinances(roleCodes);
   const model = useMemo(() => buildExecutiveFinanceModel(), []);
   const [section, setSection] = useState<SectionId>("dashboard");
 
   const alertCount = FINANCE_ALERTS.filter((a) => a.level !== "info").length;
+  const sm = model.scheduleMetrics;
 
   return (
     <div className="space-y-4">
       <FinancesPrototypeBanner />
       <FinancesRoleBanner roleCodes={roleCodes} />
+      <FinancesScheduleFallbackBanner visible={Boolean(model.scheduleUsedFallback)} />
 
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-gradient-to-r from-slate-900 to-slate-800 px-4 py-3 text-white shadow-md">
         <div className="flex items-center gap-3">
@@ -79,15 +88,23 @@ export function FinancesWorkspace({ roleCodes }: Props) {
         </div>
         <div className="flex flex-wrap gap-4 text-sm">
           <div>
-            <p className="text-slate-400 text-xs">Ταμειακή ροή</p>
-            <p className="font-bold tabular-nums">
-              {fullAccess
-                ? model.kpis.find((k) => k.id === "cashflow")?.formatted ?? "—"
-                : model.kpis.find((k) => k.id === "real_revenue")?.formatted ?? "—"}
+            <p className="text-slate-400 text-xs">Υπολογιζόμενα (πρόγραμμα)</p>
+            <p className="font-bold tabular-nums">{formatEuro(model.scheduleMetrics.calculatedRevenue)}</p>
+          </div>
+          <div>
+            <p className="text-slate-400 text-xs">Πραγματικά έσοδα</p>
+            <p className="font-bold tabular-nums text-emerald-300">
+              {formatEuro(model.scheduleMetrics.realRevenue)}
             </p>
           </div>
           <div>
-            <p className="text-slate-400 text-xs">Είσπραξη</p>
+            <p className="text-slate-400 text-xs">Ανεξόφλητο</p>
+            <p className="font-bold tabular-nums text-amber-200">
+              {formatEuro(model.scheduleMetrics.outstandingBalance)}
+            </p>
+          </div>
+          <div>
+            <p className="text-slate-400 text-xs">Είσπραξη / τζίρος</p>
             <p className="font-bold tabular-nums">{model.collectionRatePct}%</p>
           </div>
           <div>
@@ -125,14 +142,23 @@ export function FinancesWorkspace({ roleCodes }: Props) {
       </nav>
 
       {section === "dashboard" ? <ExecutiveDashboardSection model={model} fullAccess={fullAccess} /> : null}
+      {section === "schedule" ? <ScheduleFinanceSection model={model} /> : null}
       {section === "cashflow" ? <CashFlowSection model={model} fullAccess={fullAccess} /> : null}
       {section === "budget" ? <BudgetSection model={model} fullAccess={fullAccess} /> : null}
       {section === "revenue" ? <RevenueAnalysisSection model={model} fullAccess={fullAccess} /> : null}
-      {section === "parents" ? <ParentsFinancialSection /> : null}
+      {section === "parents" ? <ParentsFinancialSection model={model} fullAccess={fullAccess} /> : null}
       {section === "expenses" ? <ExpensesSection fullAccess={fullAccess} /> : null}
       {section === "transactions" ? <TransactionsSection /> : null}
       {section === "forecast" ? <ForecastSection model={model} fullAccess={fullAccess} /> : null}
       {section === "alerts" ? <AlertsSection /> : null}
     </div>
+  );
+}
+
+export function FinancesWorkspace(props: Props) {
+  return (
+    <FinancesWorkspaceErrorBoundary roleCodes={props.roleCodes}>
+      <FinancesWorkspaceInner {...props} />
+    </FinancesWorkspaceErrorBoundary>
   );
 }

@@ -74,12 +74,16 @@ export const REVENUE_DEFINITIONS: { term: string; definition: string }[] = [
   { term: "Πρόβλεψη εσόδων", definition: "Εκτίμηση εσόδων επόμενου μήνα (ενεργά παιδιά + νέες εγγραφές)." },
 ];
 
+function safeAmount(amount: number): number {
+  return Number.isFinite(amount) ? amount : 0;
+}
+
 export function formatEuro(amount: number): string {
   return new Intl.NumberFormat("el-GR", {
     style: "currency",
     currency: "EUR",
     maximumFractionDigits: 0,
-  }).format(amount);
+  }).format(safeAmount(amount));
 }
 
 export function formatEuroPrecise(amount: number): string {
@@ -88,7 +92,7 @@ export function formatEuroPrecise(amount: number): string {
     currency: "EUR",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(amount);
+  }).format(safeAmount(amount));
 }
 
 export function formatPct(value: number, signed = false): string {

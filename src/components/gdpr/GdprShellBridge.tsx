@@ -9,6 +9,8 @@ type Props = {
   userId: string | null;
   userEmail: string | null | undefined;
   roleCodes: RoleCode[];
+  assignedChildIds?: string[];
+  parentChildIds?: string[];
 };
 
 export function GdprShellBridge({
@@ -17,6 +19,8 @@ export function GdprShellBridge({
   userId,
   userEmail,
   roleCodes,
+  assignedChildIds = [],
+  parentChildIds = [],
 }: Props) {
   const userLabel = userEmail?.split("@")[0] ?? "Χρήστης";
 
@@ -26,6 +30,8 @@ export function GdprShellBridge({
       userId={userId}
       userLabel={userLabel}
       roleCodes={roleCodes}
+      assignedChildIds={assignedChildIds}
+      parentChildIds={parentChildIds}
     >
       {children}
     </GdprProvider>

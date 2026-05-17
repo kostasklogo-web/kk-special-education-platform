@@ -121,9 +121,25 @@ export function ClinicalSessionNotesSection({ childId, notes, goals, canViewBodi
                 <span className="font-semibold text-ink">
                   {formatDateEl((n.session_starts_at ?? n.updated_at).slice(0, 10))}
                 </span>
-                <span>
-                  {n.discipline_name_el} · {n.author_display_name ?? n.therapist_name} ·{" "}
-                  {sessionNoteStatusLabelEl(n.status)}
+                <span className="flex flex-wrap items-center gap-1.5">
+                  {n.visible_to_parent ? (
+                    <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-bold text-sky-900">
+                      Γονέας
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-clinical-50 px-2 py-0.5 text-[10px] font-bold text-clinical-800">
+                      Κλινικό
+                    </span>
+                  )}
+                  {n.visible_to_supervisor && !n.visible_to_parent ? (
+                    <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold text-violet-900">
+                      Επόπτης
+                    </span>
+                  ) : null}
+                  <span>
+                    {n.discipline_name_el} · {n.author_display_name ?? n.therapist_name} ·{" "}
+                    {sessionNoteStatusLabelEl(n.status)}
+                  </span>
                 </span>
               </div>
               {canViewBodies ? (

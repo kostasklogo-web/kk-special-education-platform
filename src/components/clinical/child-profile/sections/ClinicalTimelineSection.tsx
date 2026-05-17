@@ -15,7 +15,7 @@ const FILTER_OPTIONS: { value: ClinicalTimelineEventKind | "all"; label: string 
   { value: "goal", label: "Στόχοι" },
   { value: "therapeutic_change", label: "Αλλαγές στόχων" },
   { value: "supervision", label: "Εποπτεία" },
-  { value: "interdisciplinary", label: "Διεπιπληρωματικά" },
+  { value: "interdisciplinary", label: "Διεπιστημονικά" },
   { value: "parent_guidance", label: "Καθοδήγηση γονέων" },
   { value: "school_collaboration", label: "Σχολείο" },
 ];
@@ -39,7 +39,7 @@ export function ClinicalTimelineSection({ events }: { events: ClinicalTimelineEv
   return (
     <section className="space-y-4">
       <p className="text-sm text-ink-muted">
-        Χρονολογική ροή κλινικών γεγονότων — αξιολογήσεις, σημειώσεις, αναφορές, εποπτεία, διεπιπληρωματικές
+        Χρονολογική ροή κλινικών γεγονότων — αξιολογήσεις, σημειώσεις, αναφορές, εποπτεία, διεπιστημονικές
         αποφάσεις και συνεργασία σχολείου.
       </p>
       <div className="flex flex-wrap gap-2">

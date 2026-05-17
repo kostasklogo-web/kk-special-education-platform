@@ -86,7 +86,8 @@ function childScopeAllowed(ctx: GdprPermissionContext): boolean {
     return parentChildIds?.includes(targetChildId) ?? false;
   }
   if (hasRole(roleCodes, THER) && !hasRole(roleCodes, [...MGMT, ...SUP, "RECEPTION"])) {
-    return assignedChildIds?.includes(targetChildId) ?? true;
+    if (!assignedChildIds) return false;
+    return assignedChildIds.includes(targetChildId);
   }
   return true;
 }

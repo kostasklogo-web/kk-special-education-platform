@@ -151,6 +151,13 @@ export type FinanceForecastSnapshot = {
 export type ExecutiveFinanceModel = {
   monthLabel: string;
   monthYmd: string;
+  /** Integrated schedule/session billing read model */
+  scheduleSource: "control_center_demo" | "sessions_db";
+  /** True when schedule read model failed and static demo fallback was used */
+  scheduleUsedFallback?: boolean;
+  scheduleMetrics: import("@/lib/finance/types").FinanceScheduleMetrics;
+  sessionCharges: import("@/lib/finance/types").SessionBillingCharge[];
+  parentProfilesFromSchedule: import("@/lib/finance/types").ParentFinancialProfile[];
   kpis: ExecutiveKpi[];
   cashFlowPct: number;
   collectionRatePct: number;

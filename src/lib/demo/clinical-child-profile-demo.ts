@@ -13,7 +13,13 @@ import {
   buildSupervisionBundle,
 } from "@/lib/clinical/child-profile/derive";
 import type { ClinicalChildProfileBundle } from "@/lib/clinical/child-profile/types";
+import { mapClinicalTeamAssignments } from "@/lib/clinical/child-profile/map-clinical-team";
 import { DEMO_PRIMARY_CENTER_ID, getDemoOrganizationId } from "@/lib/config/demo";
+import {
+  DEMO_CLINICAL_CHILD_B_ID,
+  DEMO_CLINICAL_CHILD_ID,
+} from "@/lib/demo/clinical-demo-ids";
+import { buildDemoTherapistAssignmentsSeed } from "@/lib/demo/therapist-assignments-demo";
 import type { ChildListItem, ParentLinkRow, TherapyProgramSummary } from "@/lib/data/children/types";
 import type { ProgressReportListItem } from "@/lib/data/progress-reports/types";
 import type { SessionListItem } from "@/lib/data/sessions/types";
@@ -21,7 +27,7 @@ import type { SessionNoteListItem } from "@/lib/data/session-notes/types";
 import type { TherapyGoalListItem } from "@/lib/data/therapy-goals/types";
 import { addDaysAthensCalendar, todayAthensYmd } from "@/lib/schedule/athens-civil";
 
-export const DEMO_CLINICAL_CHILD_ID = "20000000-0000-4000-8000-000000000101";
+export { DEMO_CLINICAL_CHILD_ID } from "@/lib/demo/clinical-demo-ids";
 
 const ORG = getDemoOrganizationId();
 const CENTER = DEMO_PRIMARY_CENTER_ID;
@@ -33,12 +39,13 @@ function isoDaysAgo(days: number, hour = 10): string {
 }
 
 function buildDemoChild(childId: string): ChildListItem {
+  const isChildB = childId === DEMO_CLINICAL_CHILD_B_ID;
   return {
     id: childId,
     organization_id: ORG,
     primary_center_id: CENTER,
-    first_name: "Νίκος",
-    last_name: "Παπαδόπουλος",
+    first_name: isChildB ? "Ελένη" : "Νίκος",
+    last_name: isChildB ? "Demo" : "Παπαδόπουλος",
     date_of_birth: "2018-03-12",
     gender: "male",
     preferred_language: "el",
@@ -47,7 +54,7 @@ function buildDemoChild(childId: string): ChildListItem {
     school_grade: "Β' Δημοτικού",
     enrollment_start_date: "2024-09-01",
     notes:
-      "Κλινική παρακολούθηση διεπιπληρωματικής ομάδας. Συντονισμός με σχολείο για προσαρμογές στην τάξη.",
+      "Κλινική παρακολούθηση διεπιστημονικής ομάδας. Συντονισμός με σχολείο για προσαρμογές στην τάξη.",
     created_at: isoDaysAgo(400),
     updated_at: isoDaysAgo(2),
     deleted_at: null,
@@ -95,7 +102,7 @@ function buildDemoGoals(childId: string): TherapyGoalListItem[] {
       discipline_code: "speech",
       therapist_user_id: "ther-demo-1",
       title: "Εκφραστική γλώσσα σε προτάσεις",
-      description: "Διεπιπληρωματικός στόχος με OT",
+      description: "Διεπιστημονικός στόχος με OT",
       success_criterion: "5 προτάσεις 3-λέξεων σε δομημένη δραστηριότητα, 3/4 συνεδρίες",
       start_date: addDaysAthensCalendar(today, -120),
       target_completion_date: addDaysAthensCalendar(today, 60),
@@ -332,7 +339,7 @@ function buildDemoNotes(childId: string, sessions: SessionListItem[]): SessionNo
       activities: "Παιχνίδι κατηγοριών, εικόνες",
       child_response: "Συνεργάσιμος, κούραση στο τέλος",
       observations:
-        "Διεπιπληρωματική παρατήρηση: βελτίωση στην οργάνωση μετά από OT συνεδρία. Ανησυχία για αυτορρύθμιση στο σχολείο.",
+        "Διεπιστημονική παρατήρηση: βελτίωση στην οργάνωση μετά από OT συνεδρία. Ανησυχία για αυτορρύθμιση στο σχολείο.",
       suggestions_next: "Συντονισμός με ψυχολόγο για στρατηγικές στην τάξη.",
       visible_to_supervisor: true,
       visible_to_parent: false,
@@ -448,7 +455,7 @@ function buildDemoReports(childId: string): ProgressReportListItem[] {
       status: "approved",
       period_start: addDaysAthensCalendar(today, -310),
       period_end: addDaysAthensCalendar(today, -300),
-      summary: "Πλήρης διεπιπληρωματική αξιολόγηση. Συστάσεις για λογοθεραπεία 2x/εβδ. και εργοθεραπεία.",
+      summary: "Πλήρης διεπιστημονική αξιολόγηση. Συστάσεις για λογοθεραπεία 2x/εβδ. και εργοθεραπεία.",
       updated_at: isoDaysAgo(295),
     },
     {
@@ -521,7 +528,7 @@ export function buildDemoClinicalChildProfileBundle(
   const child = buildDemoChild(childId);
   const parentLinks = buildDemoParents();
   const programs: TherapyProgramSummary[] = [
-    { id: "prog-1", title: "Διεπιπληρωματικό πρόγραμμα", discipline_code: null },
+    { id: "prog-1", title: "Διεπιστημονικό πρόγραμμα", discipline_code: null },
   ];
   const treatmentPlans = [
     { id: "plan-demo-1", title: "Πλάνο παρέμβασης 2025–26", status: "active" },
@@ -532,12 +539,15 @@ export function buildDemoClinicalChildProfileBundle(
   const progressReports = buildDemoReports(childId);
 
   const assignedTherapists = buildAssignedTherapistsFromSessions(sessions, goals);
+  const clinicalTeamAssignments = mapClinicalTeamAssignments(
+    buildDemoTherapistAssignmentsSeed(ORG).filter((a) => a.childId === childId)
+  );
   const assignedSpecialties = buildAssignedSpecialties(sessions, goals);
   const goalProgress = buildGoalProgressMap(goals, sessionNotes);
   const evaluationSummary = buildEvaluationSummary(sessions, progressReports);
   const collaboration = buildCollaborationBundle(sessionNotes, sessions);
   const supervision = buildSupervisionBundle(sessions, sessionNotes, child.notes);
-  const timeline = buildClinicalTimeline({ childId, sessions, sessionNotes, goals, progressReports });
+  const timeline = buildClinicalTimeline({ childId, sessions, sessionNotes, goals, reports: progressReports });
   const alerts = computeClinicalAlerts({ childId, goals, sessions, sessionNotes, reports: progressReports });
 
   const activeGoals = goals.filter((g) => ["active", "in_progress", "on_hold"].includes(g.status));
@@ -549,6 +559,7 @@ export function buildDemoClinicalChildProfileBundle(
     programs,
     treatmentPlans,
     assignedTherapists,
+    clinicalTeamAssignments,
     assignedSpecialties,
     goals,
     goalProgress,

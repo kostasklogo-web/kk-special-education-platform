@@ -5,9 +5,19 @@ import {
   canViewClinicalNoteField,
 } from "@/lib/gdpr/permissions";
 
+/** Secretary-only users must not open the clinical child file shell. */
+export function isSecretaryOnlyClinical(roleCodes: RoleCode[]): boolean {
+  return (
+    roleCodes.includes("RECEPTION") &&
+    !roleCodes.some((c) => ["THERAPIST", "SUPERVISOR", "ORG_OWNER", "ORG_ADMIN"].includes(c))
+  );
+}
+
 export function canViewClinicalChildProfile(roleCodes: RoleCode[]): boolean {
   if (roleCodes.length === 0) return false;
-  return !isParentOnly(roleCodes);
+  if (isParentOnly(roleCodes)) return false;
+  if (isSecretaryOnlyClinical(roleCodes)) return false;
+  return true;
 }
 
 export function canViewSupervisionSection(roleCodes: RoleCode[]): boolean {
@@ -40,6 +50,14 @@ export function canSeeSecretaryOperationalLink(roleCodes: RoleCode[]): boolean {
 /** Management-level clinical comments on child record. */
 export function canViewClinicalDirectorComments(roleCodes: RoleCode[]): boolean {
   return roleCodes.some((c) => ["ORG_OWNER", "ORG_ADMIN"].includes(c));
+}
+
+/** Confidential / restricted clinical notes (not secretary, not parent). */
+export function canViewConfidentialClinicalNotes(roleCodes: RoleCode[]): boolean {
+  if (isSecretaryOnlyClinical(roleCodes)) return false;
+  return roleCodes.some((c) =>
+    ["ORG_OWNER", "ORG_ADMIN", "SUPERVISOR", "THERAPIST"].includes(c)
+  );
 }
 
 export function clinicalRoleLabel(roleCodes: RoleCode[]): string {

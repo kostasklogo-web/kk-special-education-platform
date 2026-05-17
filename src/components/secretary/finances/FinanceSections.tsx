@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -11,12 +12,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import type { ExecutiveFinanceModel } from "@/lib/secretary/finances/types";
-import {
-  FINANCE_ALERTS,
-  FINANCE_EXPENSES,
-  FINANCE_PARENT_BALANCES,
-  FINANCE_TRANSACTIONS,
-} from "@/lib/secretary/finances/demo-data";
+import { FINANCE_ALERTS, FINANCE_EXPENSES, FINANCE_TRANSACTIONS } from "@/lib/secretary/finances/demo-data";
 import {
   EXPENSE_CATEGORY_LABELS,
   FINANCE_CENTER_LABELS,
@@ -55,9 +51,15 @@ function balanceStatusClass(status: ParentBalanceStatus): string {
 
 type SectionProps = { model: ExecutiveFinanceModel; fullAccess: boolean };
 
+function safeMax(values: number[], floor = 1): number {
+  if (!values.length) return floor;
+  const m = Math.max(...values);
+  return Number.isFinite(m) ? Math.max(m, floor) : floor;
+}
+
 export function ExecutiveDashboardSection({ model, fullAccess }: SectionProps) {
-  const maxCenter = Math.max(...model.revenueByCenter.map((r) => r.amount), 1);
-  const maxBudget = Math.max(...model.budgetLines.map((b) => Math.max(b.budgetAmount, b.actualAmount)), 1);
+  const maxCenter = safeMax(model.revenueByCenter.map((r) => r.amount));
+  const maxBudget = safeMax(model.budgetLines.map((b) => Math.max(b.budgetAmount, b.actualAmount)));
   const visibleKpis = model.kpis.filter((k) => fullAccess || !k.managementOnly);
 
   return (
@@ -107,6 +109,42 @@ export function ExecutiveDashboardSection({ model, fullAccess }: SectionProps) {
           <ExecutiveKpiCard key={kpi.id} kpi={kpi} masked={!fullAccess && kpi.managementOnly} />
         ))}
       </div>
+
+      <Panel title="Έσοδα από Πρόγραμμα (σύνδεση με συνεδρίες)">
+        <MetricStrip
+          items={[
+            {
+              label: "Υπολογιζόμενα έσοδα",
+              value: formatEuro(model.scheduleMetrics.calculatedRevenue),
+              tone: "neutral",
+            },
+            {
+              label: "Πραγματικά έσοδα",
+              value: formatEuro(model.scheduleMetrics.realRevenue),
+              tone: "good",
+            },
+            {
+              label: "Διαφορά / Τζίρος",
+              value: formatEuro(model.scheduleMetrics.collectionGap),
+              tone: "bad",
+            },
+            {
+              label: "Κίνδυνος είσπραξης",
+              value:
+                model.scheduleMetrics.collectionRiskLevel === "high"
+                  ? "Υψηλός"
+                  : model.scheduleMetrics.collectionRiskLevel === "medium"
+                    ? "Μέτριος"
+                    : "Χαμηλός",
+              tone: model.scheduleMetrics.collectionRiskLevel === "low" ? "good" : "neutral",
+            },
+          ]}
+        />
+        <p className="mt-3 text-xs text-ink-muted">
+          Πηγή: πρόγραμμα control-center (demo) · {model.sessionCharges.length} γραμμές χρέωσης ·{" "}
+          {model.scheduleSource === "control_center_demo" ? "χωρίς Supabase" : "βάση δεδομένων"}.
+        </p>
+      </Panel>
 
       <Panel title="Ορισμοί εσόδων (διοίκηση)">
         <dl className="grid gap-2 sm:grid-cols-2">
@@ -165,7 +203,7 @@ export function CashFlowSection({ model, fullAccess }: SectionProps) {
     );
   }
 
-  const maxCash = Math.max(...model.cashFlowMonths.flatMap((m) => [m.inflow, m.outflow]));
+  const maxCash = safeMax(model.cashFlowMonths.flatMap((m) => [m.inflow, m.outflow]));
 
   return (
     <section className="space-y-4" aria-labelledby="cf-section">
@@ -371,7 +409,7 @@ function RevenueBreakdownPanel({
   title: string;
   rows: { id: string; label: string; amount: number; sharePct: number }[];
 }) {
-  const max = Math.max(...rows.map((r) => r.amount), 1);
+  const max = safeMax(rows.map((r) => r.amount));
   return (
     <Panel title={title}>
       <div className="space-y-2">
@@ -402,40 +440,40 @@ export function RevenueAnalysisSection({ model }: SectionProps) {
   );
 }
 
-export function ParentsFinancialSection() {
+export function ParentsFinancialSection({ model }: SectionProps) {
+  const rows = model.parentProfilesFromSchedule ?? [];
   return (
     <section className="space-y-3" aria-labelledby="parents-fin">
-      <SectionHeading
-        title="Οικονομική παρακολούθηση γονέων"
-        description="Υπόλοιπα, συνέπεια πληρωμών και κίνδυνος μη είσπραξης"
-      />
+      <SectionHeading title="Οικονομική παρακολούθηση γονέων" description="Από χρεώσεις προγράμματος" />
       <div className="overflow-x-auto rounded-xl border border-border bg-white shadow-sm">
-        <table className="w-full min-w-[1100px] text-left text-sm">
+        <table className="w-full min-w-[1000px] text-left text-sm">
           <thead className="border-b border-border bg-surface-muted/60 text-xs font-semibold uppercase text-ink-muted">
             <tr>
               <th className="px-3 py-2.5">Γονέας</th>
-              <th className="px-3 py-2.5">Παιδί</th>
+              <th className="px-3 py-2.5">Παιδιά</th>
               <th className="px-3 py-2.5">Κέντρο</th>
-              <th className="px-3 py-2.5 text-right">Μην. χρέωση</th>
+              <th className="px-3 py-2.5 text-right">Αναμενόμενο</th>
               <th className="px-3 py-2.5 text-right">Πληρώθηκε</th>
               <th className="px-3 py-2.5 text-right">Υπόλοιπο</th>
-              <th className="px-3 py-2.5 text-right">Ημέρες</th>
+              <th className="px-3 py-2.5 text-right">Ημέρες καθυστέρησης</th>
               <th className="px-3 py-2.5 text-right">Συνέπεια</th>
               <th className="px-3 py-2.5">Κίνδυνος</th>
               <th className="px-3 py-2.5">Κατάσταση</th>
-              <th className="px-3 py-2.5">Ενέργειες</th>
+              <th className="px-3 py-2.5 text-right">Συνεδρίες</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {FINANCE_PARENT_BALANCES.map((row) => (
+            {rows.map((row) => (
               <tr key={row.id} className="hover:bg-surface-muted/30">
                 <td className="px-3 py-2.5 font-medium">{row.parentName}</td>
-                <td className="px-3 py-2.5">{row.childName}</td>
+                <td className="px-3 py-2.5 text-ink-muted">{row.children.join(", ")}</td>
                 <td className="px-3 py-2.5">{FINANCE_CENTER_LABELS[row.center]}</td>
-                <td className="px-3 py-2.5 text-right tabular-nums">{formatEuroPrecise(row.monthlyFee)}</td>
+                <td className="px-3 py-2.5 text-right tabular-nums">
+                  {formatEuroPrecise(row.monthlyExpectedCharge)}
+                </td>
                 <td className="px-3 py-2.5 text-right tabular-nums">{formatEuroPrecise(row.amountPaid)}</td>
                 <td className="px-3 py-2.5 text-right font-semibold tabular-nums">
-                  {formatEuroPrecise(row.outstandingBalance)}
+                  {formatEuroPrecise(row.outstandingAmount)}
                 </td>
                 <td className="px-3 py-2.5 text-right">{row.overdueDays > 0 ? row.overdueDays : "—"}</td>
                 <td className="px-3 py-2.5 text-right tabular-nums">{row.paymentConsistencyPct}%</td>
@@ -449,23 +487,7 @@ export function ParentsFinancialSection() {
                     {PARENT_BALANCE_STATUS_LABELS[row.status]}
                   </span>
                 </td>
-                <td className="px-3 py-2.5">
-                  <div className="flex gap-1">
-                    <Link
-                      href="/secretary/payments"
-                      className="rounded border border-border px-2 py-1 text-xs font-medium hover:bg-surface-muted"
-                    >
-                      Πληρωμή
-                    </Link>
-                    <button
-                      type="button"
-                      className="inline-flex items-center gap-0.5 rounded border border-border px-2 py-1 text-xs"
-                      onClick={() => window.alert("Πρωτότυπο: υπενθύμιση γονέα.")}
-                    >
-                      <MessageCircle className="h-3 w-3" aria-hidden />
-                    </button>
-                  </div>
-                </td>
+                <td className="px-3 py-2.5 text-ink-muted tabular-nums">{row.linkedChargeIds.length}</td>
               </tr>
             ))}
           </tbody>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { BarChart3, CalendarDays, FileText, Target } from "lucide-react";
+import { BarChart3, CalendarDays, ClipboardList, FileText, LineChart, Target } from "lucide-react";
 import type { ClinicalProfileTab } from "@/lib/clinical/child-profile/types";
 import {
   buildClinicalGoalsHref,
@@ -28,13 +28,13 @@ export function ClinicalWorkflowRail({
   onNavigate?: (tab: ClinicalProfileTab) => void;
 }) {
   const steps: Step[] = [
-    { id: "goals", label: "Στόχοι", href: buildClinicalGoalsHref(childId), icon: Target, count: counts.goals },
     {
-      id: "sessions",
-      label: "Συνεδρίες",
-      href: buildClinicalScheduleHref(childId),
-      icon: CalendarDays,
+      id: "evaluations",
+      label: "Αξιολογήσεις",
+      href: buildClinicalGoalsHref(childId),
+      icon: ClipboardList,
     },
+    { id: "goals", label: "Στόχοι", href: buildClinicalGoalsHref(childId), icon: Target, count: counts.goals },
     {
       id: "notes",
       label: "Σημειώσεις",
@@ -43,22 +43,40 @@ export function ClinicalWorkflowRail({
       count: counts.sessionNotes,
     },
     {
+      id: "progress",
+      label: "Πρόοδος",
+      href: buildClinicalReportsHref(childId),
+      icon: LineChart,
+    },
+    {
       id: "reports",
       label: "Αναφορές",
       href: buildClinicalReportsHref(childId),
       icon: BarChart3,
       count: counts.reports,
     },
+    {
+      id: "sessions",
+      label: "Συνεδρίες",
+      href: buildClinicalScheduleHref(childId),
+      icon: CalendarDays,
+    },
   ];
 
-  const tabIds = new Set<ClinicalProfileTab>(["goals", "notes", "reports"]);
+  const tabIds = new Set<ClinicalProfileTab>([
+    "evaluations",
+    "goals",
+    "notes",
+    "progress",
+    "reports",
+  ]);
 
   return (
     <nav aria-label="Κλινική ροή εργασίας" className="rounded-xl border border-clinical-100 bg-clinical-50/40 p-3">
       <p className="mb-2 text-center text-[10px] font-semibold uppercase tracking-wide text-clinical-800">
         Γρήγορη πρόσβαση — κλινική εργασία
       </p>
-      <ol className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <ol className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
         {steps.map((step) => {
           const Icon = step.icon;
           const useTab = onNavigate && tabIds.has(step.id as ClinicalProfileTab);

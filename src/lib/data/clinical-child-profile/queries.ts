@@ -9,6 +9,8 @@ import {
   buildGoalProgressMap,
   buildSupervisionBundle,
 } from "@/lib/clinical/child-profile/derive";
+import { mapClinicalTeamAssignments } from "@/lib/clinical/child-profile/map-clinical-team";
+import { listAssignmentsForChild } from "@/lib/data/therapist-assignments/queries";
 import type {
   AssignedTherapistSummary,
   ClinicalChildProfileBundle,
@@ -222,6 +224,12 @@ export async function getClinicalChildProfileBundle(childId: string): Promise<{
   }
 
   const treatmentPlans = await listTreatmentPlansForChild(childId);
+  const assignmentRows = await listAssignmentsForChild({
+    organizationId: org,
+    childId,
+    includeEnded: true,
+  });
+  const clinicalTeamAssignments = mapClinicalTeamAssignments(assignmentRows);
   const assignedTherapists = buildAssignedTherapists(sessions, goals);
   const assignedSpecialties = buildAssignedSpecialties(sessions, goals);
   const goalProgress = buildGoalProgressMap(goals, sessionNotes);
@@ -242,6 +250,7 @@ export async function getClinicalChildProfileBundle(childId: string): Promise<{
       programs,
       treatmentPlans,
       assignedTherapists,
+      clinicalTeamAssignments,
       assignedSpecialties,
       goals,
       goalProgress,

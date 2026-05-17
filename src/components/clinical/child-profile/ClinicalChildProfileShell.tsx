@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import type { ClinicalChildProfileBundle, ClinicalProfileTab } from "@/lib/clinical/child-profile/types";
 import {
   canViewClinicalDirectorComments,
+  canViewConfidentialClinicalNotes,
   canViewInterdisciplinarySection,
   canViewSessionNoteClinicalBody,
   canViewSupervisionSection,
@@ -24,6 +25,8 @@ import { ClinicalReportsSection } from "./sections/ClinicalReportsSection";
 import { ClinicalEvaluationsSection } from "./sections/ClinicalEvaluationsSection";
 import { ClinicalInterdisciplinarySection } from "./sections/ClinicalInterdisciplinarySection";
 import { ClinicalSupervisionSection } from "./sections/ClinicalSupervisionSection";
+import { ClinicalProgressPlaceholderSection } from "./sections/ClinicalProgressPlaceholderSection";
+import { ClinicalConfidentialNotesSection } from "./sections/ClinicalConfidentialNotesSection";
 import { ClinicalAlertsSection } from "./sections/ClinicalAlertsSection";
 import { ClinicalPrototypeBanner } from "./ClinicalPrototypeBanner";
 import { ClinicalOverviewStrip } from "./ClinicalOverviewStrip";
@@ -56,21 +59,24 @@ export function ClinicalChildProfileShell({
   const showSupervision = canViewSupervisionSection(roleCodes);
   const showInterdisciplinary = canViewInterdisciplinarySection(roleCodes);
   const showDirectorComments = canViewClinicalDirectorComments(roleCodes);
+  const showConfidential = canViewConfidentialClinicalNotes(roleCodes);
 
   const visibleTabs = useMemo((): ClinicalProfileTab[] => {
     const tabs: ClinicalProfileTab[] = [
       "overview",
-      "alerts",
-      "timeline",
+      "evaluations",
       "goals",
       "notes",
+      "progress",
       "reports",
-      "evaluations",
     ];
     if (showInterdisciplinary) tabs.push("interdisciplinary");
     if (showSupervision) tabs.push("supervision");
+    if (showConfidential) tabs.push("confidential");
+    if (bundle.alerts.length > 0) tabs.push("alerts");
+    tabs.push("timeline");
     return tabs;
-  }, [showInterdisciplinary, showSupervision]);
+  }, [showInterdisciplinary, showSupervision, showConfidential, bundle.alerts.length]);
 
   const alertCount = bundle.alerts.length;
   const { child, parentLinks, counts } = bundle;
@@ -132,8 +138,14 @@ export function ClinicalChildProfileShell({
             {tab === "overview" && (
               <ClinicalOverviewSection bundle={bundle} canViewNoteBodies={canViewNoteBodies} />
             )}
-            {tab === "alerts" && <ClinicalAlertsSection alerts={bundle.alerts} />}
-            {tab === "timeline" && <ClinicalTimelineSection events={bundle.timeline} />}
+            {tab === "evaluations" && (
+              <ClinicalEvaluationsSection
+                childId={child.id}
+                sessions={bundle.sessions}
+                evaluationSummary={bundle.evaluationSummary}
+                alerts={bundle.alerts}
+              />
+            )}
             {tab === "goals" && (
               <ClinicalGoalsSection
                 childId={child.id}
@@ -150,16 +162,9 @@ export function ClinicalChildProfileShell({
                 canViewBodies={canViewNoteBodies}
               />
             )}
+            {tab === "progress" && <ClinicalProgressPlaceholderSection bundle={bundle} />}
             {tab === "reports" && (
               <ClinicalReportsSection childId={child.id} reports={bundle.progressReports} />
-            )}
-            {tab === "evaluations" && (
-              <ClinicalEvaluationsSection
-                childId={child.id}
-                sessions={bundle.sessions}
-                evaluationSummary={bundle.evaluationSummary}
-                alerts={bundle.alerts}
-              />
             )}
             {tab === "interdisciplinary" && showInterdisciplinary && (
               <ClinicalInterdisciplinarySection collaboration={bundle.collaboration} />
@@ -170,6 +175,14 @@ export function ClinicalChildProfileShell({
                 canViewDirectorComments={showDirectorComments}
               />
             )}
+            {tab === "confidential" && showConfidential && (
+              <ClinicalConfidentialNotesSection
+                childId={child.id}
+                canViewConfidential={showSupervision || showDirectorComments}
+              />
+            )}
+            {tab === "alerts" && <ClinicalAlertsSection alerts={bundle.alerts} />}
+            {tab === "timeline" && <ClinicalTimelineSection events={bundle.timeline} />}
           </div>
         </div>
 

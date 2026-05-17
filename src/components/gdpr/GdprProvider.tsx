@@ -55,6 +55,8 @@ type Props = {
   userId: string | null;
   userLabel: string;
   roleCodes: RoleCode[];
+  assignedChildIds?: string[];
+  parentChildIds?: string[];
 };
 
 export function GdprProvider({
@@ -63,14 +65,18 @@ export function GdprProvider({
   userId,
   userLabel,
   roleCodes,
+  assignedChildIds = [],
+  parentChildIds = [],
 }: Props) {
   const permissionCtx = useCallback(
     (targetChildId?: string | null): GdprPermissionContext => ({
       roleCodes,
       userId,
+      assignedChildIds,
+      parentChildIds,
       targetChildId: targetChildId ?? null,
     }),
-    [roleCodes, userId]
+    [roleCodes, userId, assignedChildIds, parentChildIds]
   );
 
   const can = useCallback(

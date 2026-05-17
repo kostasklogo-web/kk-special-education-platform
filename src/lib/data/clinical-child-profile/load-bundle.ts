@@ -1,5 +1,6 @@
 import "server-only";
 
+import { shouldUseClinicalAccessDemoFallback } from "@/lib/clinical/access/clinical-access-demo-fallback";
 import {
   buildDemoClinicalChildProfileBundle,
   isSparseClinicalBundle,
@@ -30,6 +31,15 @@ export async function loadClinicalChildProfileBundle(
       source: "demo",
       notice:
         "Προβολή πρωτοτύπου με ενδεικτικά δεδομένα (FORCE_CLINICAL_PROTOTYPE).",
+    };
+  }
+
+  if (await shouldUseClinicalAccessDemoFallback()) {
+    return {
+      bundle: buildDemoClinicalChildProfileBundle(childId),
+      source: "demo",
+      notice:
+        "Πρωτότυπο κλινικού προφίλ — ενδεικτικά δεδομένα (Supabase μη διαθέσιμο).",
     };
   }
 

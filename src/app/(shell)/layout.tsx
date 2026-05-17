@@ -4,6 +4,7 @@ import { ShellCommunicationBridge } from "@/components/secretary/reminders/Shell
 import { GdprShellBridge } from "@/components/gdpr/GdprShellBridge";
 import { canAccessSecretaryModule } from "@/lib/auth/secretary-permissions";
 import { getSessionContext } from "@/lib/auth/get-session-context";
+import { loadClinicalAccessScope } from "@/lib/clinical/access/load-clinical-access-scope";
 import { getDefaultOrganizationIdForUser } from "@/lib/data/children/queries";
 import { getSecretaryDemoBundle } from "@/lib/data/secretary/queries";
 
@@ -15,6 +16,11 @@ export default async function ShellLayout({
   const ctx = await getSessionContext();
   const { organizationId: layoutOrgId } = await getDefaultOrganizationIdForUser();
   const gdprOrganizationId = layoutOrgId ?? "";
+  const clinicalScope = await loadClinicalAccessScope({
+    organizationId: gdprOrganizationId,
+    userId: ctx.user?.id ?? null,
+    roleCodes: ctx.roleCodes,
+  });
   const secretaryEnabled = canAccessSecretaryModule(ctx.roleCodes);
 
   let communicationBundle = null;
@@ -43,6 +49,8 @@ export default async function ShellLayout({
             userId={ctx.user?.id ?? null}
             userEmail={ctx.user?.email}
             roleCodes={ctx.roleCodes}
+            assignedChildIds={clinicalScope.assignedChildIds}
+            parentChildIds={clinicalScope.parentChildIds}
           >
             <ShellCommunicationBridge enabled={secretaryEnabled} bundle={communicationBundle}>
               {children}

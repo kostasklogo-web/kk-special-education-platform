@@ -10,7 +10,7 @@ export function ClinicalInterdisciplinarySection({
   return (
     <section id="interdisciplinary" className="space-y-6">
       <p className="text-sm text-ink-muted">
-        Διεπιπληρωματικός συντονισμός — παρατηρήσεις, κοινές ανησυχίες, κλινικές αποφάσεις και σχολική
+        Διεπιστημονικός συντονισμός — παρατηρήσεις, κοινές ανησυχίες, κλινικές αποφάσεις και σχολική
         συνεργασία (κλινικό πλαίσιο μόνο).
       </p>
 

@@ -19,13 +19,13 @@ export function canAccessFile(
   action: "download" | "upload" | "view",
   ctx: GdprPermissionContext
 ): boolean {
-  const module =
+  const gdprModule =
     ref.entityType === "diagnosis"
       ? "diagnoses"
       : ref.entityType === "report"
         ? "reports"
         : "files";
-  return canPerformGdprAction(action, module, {
+  return canPerformGdprAction(action, gdprModule, {
     ...ctx,
     targetChildId: ref.childId,
   });
@@ -37,13 +37,13 @@ export function logFileAccess(
   ctx: GdprPermissionContext & { organizationId: string; userLabel: string }
 ): void {
   if (!ctx.userId) return;
-  const module = ref.entityType === "diagnosis" ? "diagnoses" : "reports";
+  const gdprModule = ref.entityType === "diagnosis" ? "diagnoses" : "reports";
   logGdprAudit({
     organizationId: ctx.organizationId,
     userId: ctx.userId,
     userLabel: ctx.userLabel,
     action,
-    module,
+    module: gdprModule,
     entityType: ref.entityType,
     entityId: ref.entityId,
     childId: ref.childId,
@@ -55,8 +55,8 @@ export function fileAccessDeniedMessage(
   ref: SecureFileRef,
   ctx: GdprPermissionContext
 ): string {
-  const module = ref.entityType === "diagnosis" ? "diagnoses" : "reports";
-  return permissionDeniedMessage("download", module, ctx.roleCodes);
+  const gdprModule = ref.entityType === "diagnosis" ? "diagnoses" : "reports";
+  return permissionDeniedMessage("download", gdprModule, ctx.roleCodes);
 }
 
 /** Placeholder for signed URL generation (server-side in production). */

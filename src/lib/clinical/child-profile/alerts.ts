@@ -140,7 +140,7 @@ export function computeClinicalAlerts(input: {
         id: "interdisciplinary",
         kind: "interdisciplinary_review",
         severity: "info",
-        title: "Διεπιπληρωματικός συντονισμός",
+        title: "Διεπιστημονικός συντονισμός",
         detail: "Υπάρχουν πολλές ειδικότητες — ελέγξτε κοινούς στόχους και παρατηρήσεις.",
         href: `#interdisciplinary`,
       });

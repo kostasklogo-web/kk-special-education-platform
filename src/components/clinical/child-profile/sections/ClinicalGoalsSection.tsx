@@ -54,7 +54,7 @@ export function ClinicalGoalsSection({ childId, goals, goalProgress, canWrite }:
         <ViewToggle label="Ενεργοί" active={view === "active"} onClick={() => setView("active")} />
         <ViewToggle label="Ολοκληρωμένοι" active={view === "completed"} onClick={() => setView("completed")} />
         <ViewToggle
-          label="Διεπιπληρωματικοί"
+          label="Διεπιστημονικοί"
           active={view === "interdisciplinary"}
           onClick={() => setView("interdisciplinary")}
         />
@@ -103,7 +103,7 @@ export function ClinicalGoalsSection({ childId, goals, goalProgress, canWrite }:
                     </p>
                   </div>
                   <div className="flex gap-1">
-                    {p?.isInterdisciplinary ? <ClinicalBadge tone="violet">Διεπιπλ.</ClinicalBadge> : null}
+                    {p?.isInterdisciplinary ? <ClinicalBadge tone="violet">Διεπισθ.</ClinicalBadge> : null}
                     {p?.linkedSessionNoteCount ? (
                       <ClinicalBadge tone="clinical">{p.linkedSessionNoteCount} σημ.</ClinicalBadge>
                     ) : null}

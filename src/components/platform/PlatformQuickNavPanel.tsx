@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { Clock, Pin, Star, UsersRound } from "lucide-react";
-import { DEMO_CLINICAL_CHILD_ID } from "@/lib/demo/clinical-child-profile-demo";
+import { DEMO_CLINICAL_CHILD_ID } from "@/lib/demo/clinical-demo-ids";
 
 const STORAGE_RECENT = "platform-recent-children";
 const STORAGE_FAVORITES = "platform-favorite-modules";

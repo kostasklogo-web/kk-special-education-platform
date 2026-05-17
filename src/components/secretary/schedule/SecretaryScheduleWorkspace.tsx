@@ -286,7 +286,7 @@ export function SecretaryScheduleWorkspace({
         onChange={onFilterChange}
         therapists={SECRETARY_DEMO_THERAPISTS}
         rooms={SECRETARY_DEMO_ROOMS}
-        children={SECRETARY_DEMO_CHILDREN}
+        childOptions={SECRETARY_DEMO_CHILDREN}
         appointmentTypes={[...SECRETARY_SCHEDULE_APPOINTMENT_TYPES]}
       />
 

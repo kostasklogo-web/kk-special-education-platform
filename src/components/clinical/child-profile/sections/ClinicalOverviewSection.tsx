@@ -5,6 +5,7 @@ import { therapyGoalStatusLabelEl } from "@/lib/ui/therapy-goal-labels";
 import { progressReportStatusLabelEl } from "@/lib/ui/progress-report-labels";
 import { formatDateEl, CHILD_STATUS_LABELS } from "@/lib/ui/child-labels";
 import { ClinicalBadge, ClinicalPanel } from "../clinical-ui";
+import { ClinicalTeamAssignmentsSection } from "./ClinicalTeamAssignmentsSection";
 
 export function ClinicalOverviewSection({
   bundle,
@@ -32,6 +33,8 @@ export function ClinicalOverviewSection({
 
   return (
     <div className="space-y-6">
+      <ClinicalTeamAssignmentsSection bundle={bundle} />
+
       <ClinicalPanel title="Ταυτότητα & κλινική κατάσταση">
         <dl className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-3">
           <div>

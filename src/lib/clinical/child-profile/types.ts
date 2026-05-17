@@ -3,18 +3,21 @@ import type { ProgressReportListItem } from "@/lib/data/progress-reports/types";
 import type { SessionListItem } from "@/lib/data/sessions/types";
 import type { SessionNoteListItem } from "@/lib/data/session-notes/types";
 import type { TherapyGoalListItem } from "@/lib/data/therapy-goals/types";
+import type { ClinicalTeamAssignmentSummary } from "@/lib/clinical/child-profile/map-clinical-team";
 
 /** Clinical profile tab identifiers. */
 export type ClinicalProfileTab =
   | "overview"
-  | "alerts"
-  | "timeline"
+  | "evaluations"
   | "goals"
   | "notes"
+  | "progress"
   | "reports"
-  | "evaluations"
   | "interdisciplinary"
-  | "supervision";
+  | "supervision"
+  | "confidential"
+  | "alerts"
+  | "timeline";
 
 export type AssignedTherapistSummary = {
   userId: string;
@@ -169,6 +172,8 @@ export type ClinicalChildProfileBundle = {
   programs: TherapyProgramSummary[];
   treatmentPlans: TreatmentPlanSummary[];
   assignedTherapists: AssignedTherapistSummary[];
+  /** Explicit assignments (access control); preferred over session-derived list. */
+  clinicalTeamAssignments: ClinicalTeamAssignmentSummary[];
   assignedSpecialties: AssignedSpecialtySummary[];
   goals: TherapyGoalListItem[];
   goalProgress: GoalProgressSummary[];
