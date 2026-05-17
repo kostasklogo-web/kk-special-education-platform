@@ -9,6 +9,7 @@ import { filterChildrenForClinicalScope } from "@/lib/clinical/access/filter-chi
 import { loadClinicalAccessScope } from "@/lib/clinical/access/load-clinical-access-scope";
 import { shouldUseClinicalAccessDemoFallback } from "@/lib/clinical/access/clinical-access-demo-fallback";
 import { getDefaultOrganizationIdForUser, listChildren } from "@/lib/data/children/queries";
+import { getDemoOrganizationId } from "@/lib/config/demo";
 import { DEMO_CLINICAL_CHILD_ID } from "@/lib/demo/clinical-demo-ids";
 import { getDemoChildrenListStubs } from "@/lib/demo/demo-children-registry";
 import { isSupabaseReachableQuickly } from "@/lib/supabase/availability";
@@ -42,8 +43,9 @@ export default async function ChildrenPage({ searchParams }: ChildrenPageProps) 
   }
 
   const { organizationId } = await getDefaultOrganizationIdForUser();
+  const orgId = organizationId ?? (useClinicalDemo ? getDemoOrganizationId() : "");
   const clinicalScope = await loadClinicalAccessScope({
-    organizationId: organizationId ?? "",
+    organizationId: orgId,
     userId: ctx.user?.id ?? null,
     roleCodes: ctx.roleCodes,
   });

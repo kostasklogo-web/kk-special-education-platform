@@ -4,6 +4,7 @@ import type { RoleCode } from "@/lib/auth/roles";
 import {
   resolveClinicalAccessOrgId,
   resolveClinicalAccessUserId,
+  shouldUseClinicalAccessDemoFallback,
 } from "@/lib/clinical/access/clinical-access-demo-fallback";
 import { listSuperviseeUserIds } from "@/lib/data/staff/queries";
 import {
@@ -70,6 +71,34 @@ export async function loadClinicalAccessScope(params: {
   } catch {
     assignedChildIds = [];
     supervisorScopedChildIds = [];
+  }
+
+  if (
+    (assignedChildIds.length === 0 || supervisorScopedChildIds.length === 0) &&
+    userId &&
+    (await shouldUseClinicalAccessDemoFallback())
+  ) {
+    try {
+      if (isTherapistOnly(roleCodes) || roleCodes.some((r) => THER.includes(r))) {
+        assignedChildIds = await listAssignedChildIdsForTherapist({
+          organizationId,
+          therapistUserId: userId,
+        });
+      }
+      if (isSupervisorOnly(roleCodes) || roleCodes.includes("SUPERVISOR")) {
+        const { ids: superviseeIds } = await listSuperviseeUserIds({
+          organizationId,
+          supervisorUserId: userId,
+        });
+        supervisorScopedChildIds = await listChildIdsInSupervisorScope({
+          organizationId,
+          supervisorUserId: userId,
+          superviseeUserIds: [...superviseeIds],
+        });
+      }
+    } catch {
+      /* keep empty */
+    }
   }
 
   return {

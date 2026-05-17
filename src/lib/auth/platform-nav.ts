@@ -405,6 +405,7 @@ const PLATFORM_QUICK_CARD_ORDER = [
   "secretary-finances",
   "management-analytics",
   "management-ops-intel",
+  "management-hr-performance",
 ] as const;
 
 /** Flat list of primary module cards for the landing dashboard. */

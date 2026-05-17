@@ -148,7 +148,12 @@ export async function listTherapistAssignments(params: {
   }
 
   if (failed) {
-    return { items: [], error: "Αποτυχία φόρτωσης αναθέσεων.", source: "database" };
+    warnClinicalAccessDemoFallback();
+    return {
+      items: filterDemoRows(params.organizationId, filters),
+      error: null,
+      source: "demo",
+    };
   }
 
   return {

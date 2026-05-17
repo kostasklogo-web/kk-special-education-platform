@@ -21,6 +21,7 @@ import { OperationalAlertCards } from "@/components/dashboard/operational-alert-
 import { EmptyState } from "@/components/shell/EmptyState";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { getSessionContext } from "@/lib/auth/get-session-context";
+import { getAuthGatingTemporarilyDisabled, getDemoOrganizationId } from "@/lib/config/demo";
 import type { RoleCode } from "@/lib/auth/roles";
 import { getDefaultOrganizationIdForUser } from "@/lib/data/children/queries";
 import { getDashboardOverview } from "@/lib/data/dashboard/queries";
@@ -127,7 +128,9 @@ export async function OperationalDashboardContent({ embedded = false }: Props) {
         </div>
       ) : null}
 
-      <DashboardQuickActions desk={isClinicalTherapistDesk ? "clinical" : "operations"} />
+      {!embedded ? (
+        <DashboardQuickActions desk={isClinicalTherapistDesk ? "clinical" : "operations"} />
+      ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {overview.metrics.map((metric, i) => (

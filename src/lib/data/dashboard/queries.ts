@@ -203,14 +203,23 @@ async function countRows(table: string, organizationId: string): Promise<{ count
 }
 
 export async function getDashboardOverview(organizationId: string): Promise<DashboardOverview> {
-  if (getAuthGatingTemporarilyDisabled()) {
-    const canReachSupabase = await isSupabaseReachableQuickly();
-    if (!canReachSupabase) {
-      return DEMO_DASHBOARD_OVERVIEW;
-    }
+  const preferDemo =
+    getAuthGatingTemporarilyDisabled() && !(await isSupabaseReachableQuickly());
+
+  if (preferDemo) {
+    return DEMO_DASHBOARD_OVERVIEW;
   }
 
-  return getLiveDashboardOverview(organizationId);
+  try {
+    const live = await getLiveDashboardOverview(organizationId);
+    if (getAuthGatingTemporarilyDisabled() && live.errors.length >= 4) {
+      return DEMO_DASHBOARD_OVERVIEW;
+    }
+    return live;
+  } catch (err) {
+    console.error("getDashboardOverview", err);
+    return DEMO_DASHBOARD_OVERVIEW;
+  }
 }
 
 async function getLiveDashboardOverview(organizationId: string): Promise<DashboardOverview> {

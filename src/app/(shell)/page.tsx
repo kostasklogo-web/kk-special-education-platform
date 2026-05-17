@@ -6,9 +6,12 @@ import { OperationalDashboardContent } from "@/components/platform/OperationalDa
 import { PageHeader } from "@/components/shell/PageHeader";
 import { TherapistCaseloadPanel } from "@/components/platform/TherapistCaseloadPanel";
 import { getSessionContext } from "@/lib/auth/get-session-context";
+import { resolveClinicalAccessUserId } from "@/lib/clinical/access/clinical-access-demo-fallback";
 import { buildTherapistCaseloadItems } from "@/lib/clinical/access/build-caseload-items";
 import { getDefaultOrganizationIdForUser, listChildren } from "@/lib/data/children/queries";
 import { listActiveAssignmentsForTherapist } from "@/lib/data/therapist-assignments/queries";
+import { getDemoChildrenListStubs } from "@/lib/demo/demo-children-registry";
+import { getDemoOrganizationId } from "@/lib/config/demo";
 import { formatAthensLongDateFromYmd, todayAthensYmd } from "@/lib/schedule/athens-civil";
 
 /** Unified platform entry — operational shell landing at `/`. */
@@ -24,18 +27,24 @@ export default async function PlatformHomePage() {
   const todayLabel = formatAthensLongDateFromYmd(todayAthensYmd());
 
   let caseloadPanel = null;
-  if (isTherapistHomeScoped(ctx.roleCodes) && ctx.user?.id) {
-    const { organizationId } = await getDefaultOrganizationIdForUser();
-    const orgId = organizationId ?? "";
-    const assignments = await listActiveAssignmentsForTherapist({
-      organizationId: orgId,
-      therapistUserId: ctx.user.id,
-    });
-    const { items: children } = await listChildren({});
-    const caseloadItems = buildTherapistCaseloadItems(assignments, children);
-    caseloadPanel = (
-      <TherapistCaseloadPanel items={caseloadItems} isPrototype={assignments.length > 0} />
-    );
+  const therapistUserId = resolveClinicalAccessUserId(ctx.user?.id ?? null);
+  if (isTherapistHomeScoped(ctx.roleCodes) && therapistUserId) {
+    try {
+      const { organizationId } = await getDefaultOrganizationIdForUser();
+      const orgId = organizationId ?? getDemoOrganizationId();
+      const assignments = await listActiveAssignmentsForTherapist({
+        organizationId: orgId,
+        therapistUserId,
+      });
+      const listed = await listChildren({}).catch(() => ({ items: getDemoChildrenListStubs(), error: null }));
+      const children = listed.items.length > 0 ? listed.items : getDemoChildrenListStubs();
+      const caseloadItems = buildTherapistCaseloadItems(assignments, children);
+      caseloadPanel = (
+        <TherapistCaseloadPanel items={caseloadItems} isPrototype={assignments.length > 0} />
+      );
+    } catch {
+      /* caseload optional on home */
+    }
   }
 
   return (
